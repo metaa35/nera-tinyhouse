@@ -20,7 +20,7 @@ export default function Settings() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/admin/login');
+      router.replace('/admin/login');
     }
   }, [status, router]);
 
@@ -40,13 +40,7 @@ export default function Settings() {
     fetchSettings();
   }, []);
 
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  if (status === 'loading') return <div>Yükleniyor...</div>;
 
   if (!session) return null;
 

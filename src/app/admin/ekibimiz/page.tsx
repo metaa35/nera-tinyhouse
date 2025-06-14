@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TeamMember } from '@/types/team';
+import { useSession } from "next-auth/react";
 
 export default function AdminTeamPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [team, setTeam] = useState<TeamMember[]>([])
   const [name, setName] = useState("")
   const [role, setRole] = useState("")
@@ -12,6 +15,14 @@ export default function AdminTeamPage() {
   const [editId, setEditId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/admin/login");
+    }
+  }, [status, router]);
+
+  if (status === "loading") return <div>Yükleniyor...</div>;
 
   useEffect(() => {
     fetch('/api/team')
