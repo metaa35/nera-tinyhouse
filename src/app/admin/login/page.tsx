@@ -22,6 +22,8 @@ export default function LoginPage() {
         redirect: false,
       })
 
+      console.log("signIn result:", result);
+
       if (result?.error) {
         setError('Geçersiz e-posta veya şifre')
       } else {
@@ -29,6 +31,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       setError('Bir hata oluştu. Lütfen tekrar deneyin.')
+      console.log("signIn catch error:", error);
     }
   }
 
