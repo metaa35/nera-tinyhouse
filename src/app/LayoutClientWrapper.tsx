@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 
+// Açıklama: Eğer admin route'undaysak, Navbar ve Footer asla render edilmez. Sadece children döner.
+
 export default function LayoutClientWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

@@ -24,6 +24,7 @@ export default function RootLayout({
       <head />
       <body className={inter.className}>
         <Providers>
+          {/* Eğer varsa koşullu render ile pathname admin ile başlıyorsa Navbar ve Footer'ı render etme */}
           <LayoutClientWrapper>
             {children}
           </LayoutClientWrapper>
