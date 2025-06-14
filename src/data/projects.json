@@ -1,0 +1,64 @@
+[
+  {
+    "id": 1749501641962,
+    "title": "123",
+    "slug": "123",
+    "description": "123",
+    "price": 123,
+    "area": 123,
+    "location": "123",
+    "images": [
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749501637/projects/e61qeq7yrywpybcxdria.jpg",
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749501638/projects/ucowabevvbyu0hpck19r.jpg",
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749501639/projects/i0g9ffjwp1sp6vefawxc.jpg"
+    ],
+    "coverImage": "https://res.cloudinary.com/df770zzfr/image/upload/v1749501638/projects/ucowabevvbyu0hpck19r.jpg",
+    "features": [
+      "312",
+      "423",
+      "645",
+      "876"
+    ]
+  },
+  {
+    "id": 1749501658181,
+    "title": "345",
+    "slug": "345",
+    "description": "345",
+    "price": 345,
+    "area": 345,
+    "location": "345",
+    "images": [
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749501654/projects/yqcfegybntv4vgxf9fsd.jpg",
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749501655/projects/cu0khedb3a5tea1yukat.jpg",
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749501656/projects/ct9jo3c05dpufk54tmxd.jpg"
+    ],
+    "coverImage": "https://res.cloudinary.com/df770zzfr/image/upload/v1749501656/projects/ct9jo3c05dpufk54tmxd.jpg",
+    "features": [
+      "SDAFSD",
+      "DASDA",
+      "GDF"
+    ]
+  },
+  {
+    "id": 1749921887445,
+    "title": "mert",
+    "slug": "mert",
+    "description": "4523",
+    "price": 534,
+    "area": 654,
+    "location": "asdas",
+    "images": [
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749921891/projects/rocbduaojeodp9urlvhc.jpg",
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749921892/projects/km4b5x1huwarjzdkbvkq.jpg",
+      "https://res.cloudinary.com/df770zzfr/image/upload/v1749921893/projects/k7s2b6tzjdzwlilbcp4z.webp"
+    ],
+    "coverImage": "https://res.cloudinary.com/df770zzfr/image/upload/v1749921892/projects/km4b5x1huwarjzdkbvkq.jpg",
+    "features": [
+      "hfd",
+      "sad",
+      "jgh",
+      "mgb"
+    ]
+  }
+]

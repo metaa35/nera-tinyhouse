@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Ayşe Yılmaz",
+    "role": "Kurucu & Mimar",
+    "photo": "/ekip1.jpg"
+  },
+  {
+    "name": "Mehmet Demir",
+    "role": "İnşaat Mühendisi",
+    "photo": "/ekip2.jpg"
+  },
+  {
+    "name": "Zeynep Kaya",
+    "role": "İç Mimar",
+    "photo": "/ekip3.jpg"
+  }
+]
