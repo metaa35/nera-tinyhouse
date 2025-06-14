@@ -18,6 +18,7 @@ declare module "next-auth/jwt" {
 }
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -26,37 +27,50 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Hardcoded admin kullanıcısı
-        const adminUser = {
-          id: "1",
-          email: "admin@nerayapi.com",
-          name: "Admin",
-          password: "$2a$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu9Uu", // admin123
-          role: "ADMIN" as Role
-        }
+        try {
+          console.log("Authorize başladı:", credentials?.email)
+          
+          // Hardcoded admin kullanıcısı
+          const adminUser = {
+            id: "1",
+            email: "admin@nerayapi.com",
+            name: "Admin",
+            password: "$2a$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu9Uu", // admin123
+            role: "ADMIN" as Role
+          }
 
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email ve şifre gerekli")
-        }
+          if (!credentials?.email || !credentials?.password) {
+            console.log("Email veya şifre eksik")
+            throw new Error("Email ve şifre gerekli")
+          }
 
-        if (credentials.email !== adminUser.email) {
-          throw new Error("Kullanıcı bulunamadı")
-        }
+          if (credentials.email !== adminUser.email) {
+            console.log("Kullanıcı bulunamadı")
+            throw new Error("Kullanıcı bulunamadı")
+          }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          adminUser.password
-        )
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            adminUser.password
+          )
 
-        if (!isPasswordValid) {
-          throw new Error("Geçersiz şifre")
-        }
+          console.log("Şifre doğrulama sonucu:", isPasswordValid)
 
-        return {
-          id: adminUser.id,
-          email: adminUser.email,
-          name: adminUser.name,
-          role: adminUser.role,
+          if (!isPasswordValid) {
+            console.log("Geçersiz şifre")
+            throw new Error("Geçersiz şifre")
+          }
+
+          console.log("Giriş başarılı, kullanıcı dönüyor")
+          return {
+            id: adminUser.id,
+            email: adminUser.email,
+            name: adminUser.name,
+            role: adminUser.role,
+          }
+        } catch (error) {
+          console.error("Authorize hatası:", error)
+          throw error
         }
       }
     })
@@ -66,9 +80,11 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 gün
   },
   callbacks: {
     async jwt({ token, user }) {
+      console.log("JWT Callback:", { token, user })
       if (user) {
         token.id = user.id
         token.role = user.role
@@ -76,6 +92,7 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
+      console.log("Session Callback:", { session, token })
       return {
         ...session,
         user: {
