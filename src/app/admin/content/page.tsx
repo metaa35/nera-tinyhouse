@@ -17,7 +17,7 @@ interface Content {
   coverImage?: string;
 }
 
-export default function ContentManagement({ children }: { children?: React.ReactNode }) {
+export default function ContentManagement() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [contents, setContents] = useState<Content[]>([]);
