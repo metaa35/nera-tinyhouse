@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-export default function Settings({ children }: { children?: React.ReactNode }) {
+export default function Settings() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [settings, setSettings] = useState({
