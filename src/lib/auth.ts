@@ -86,24 +86,28 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 gün
   },
   callbacks: {
-    async jwt({ token, user }) {
-      console.log("JWT Callback:", { token, user })
-      if (user) {
-        token.id = user.id
-        token.role = user.role
+    async jwt({ token, user, account }) {
+      console.log("JWT Callback:", { token, user, account })
+      
+      if (account && user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+        }
       }
+      
       return token
     },
     async session({ session, token }) {
       console.log("Session Callback:", { session, token })
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id,
-          role: token.role,
-        }
+      
+      if (token) {
+        session.user.id = token.id
+        session.user.role = token.role
       }
+      
+      return session
     }
   }
 } 
