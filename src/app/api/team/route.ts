@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 export async function GET() {
   const team = await prisma.team.findMany({ orderBy: { id: 'asc' } })
-  return NextResponse.json(team)
+    return NextResponse.json(team)
 }
 
 export async function POST(request: Request) {

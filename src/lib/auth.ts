@@ -1,6 +1,8 @@
-import NextAuth, { NextAuthOptions } from "next-auth"
+import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
+import { prisma } from "@/lib/prisma"
 
 export const authOptions: NextAuthOptions = {
   debug: true,
@@ -12,28 +14,26 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        const adminUser = {
-          id: "1",
-          email: "admin@nerayapi.com",
-          name: "Admin",
-          password: "$2a$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu9Uu", // admin123
-          role: "ADMIN"
-        }
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email ve şifre gerekli")
         }
-        if (credentials.email !== adminUser.email) {
+        // Veritabanında kullanıcıyı bul
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        })
+        if (!user) {
           throw new Error("Kullanıcı bulunamadı")
         }
-        const isPasswordValid = await bcrypt.compare(credentials.password, adminUser.password)
+        // Şifreyi karşılaştır
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
         if (!isPasswordValid) {
           throw new Error("Geçersiz şifre")
         }
         return {
-          id: adminUser.id,
-          email: adminUser.email,
-          name: adminUser.name,
-          role: adminUser.role,
+          id: String(user.id),
+          email: user.email,
+          name: user.name,
+          role: user.role,
         }
       }
     })

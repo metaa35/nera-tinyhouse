@@ -124,20 +124,20 @@ export default function Home() {
           <div className="flex-1 flex gap-6">
             <div className="w-1/2">
               {randomImages.hakkimizda1 && (
-                <img
+              <img
                   src={randomImages.hakkimizda1}
-                  alt="Tiny House"
-                  className="rounded-3xl object-cover w-full h-80"
-                />
+                alt="Tiny House"
+                className="rounded-3xl object-cover w-full h-80"
+              />
               )}
             </div>
             <div className="w-1/2">
               {randomImages.hakkimizda2 && (
-                <img
+              <img
                   src={randomImages.hakkimizda2}
-                  alt="Tiny House"
-                  className="rounded-3xl object-cover w-full h-80"
-                />
+                alt="Tiny House"
+                className="rounded-3xl object-cover w-full h-80"
+              />
               )}
             </div>
           </div>
@@ -155,11 +155,11 @@ export default function Home() {
             {/* Sol: Görsel */}
             <div className="flex-1 flex justify-center">
               {randomImages.hizmetlerimiz && (
-                <img
+              <img
                   src={randomImages.hizmetlerimiz}
-                  alt="Tiny House"
-                  className="rounded-3xl object-cover w-full max-w-md h-96"
-                />
+                alt="Tiny House"
+                className="rounded-3xl object-cover w-full max-w-md h-96"
+              />
               )}
             </div>
             {/* Sağ: Hizmetler */}
@@ -190,32 +190,32 @@ export default function Home() {
           </p>
           <div className="w-full flex flex-col md:flex-row gap-6 justify-center">
             {randomImages.galeri1 && (
-              <img
+            <img
                 src={randomImages.galeri1}
-                alt="Tiny House 1"
-                className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-              />
+              alt="Tiny House 1"
+              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
+            />
             )}
             {randomImages.galeri2 && (
-              <img
+            <img
                 src={randomImages.galeri2}
-                alt="Tiny House 2"
-                className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-              />
+              alt="Tiny House 2"
+              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
+            />
             )}
             {randomImages.galeri3 && (
-              <img
+            <img
                 src={randomImages.galeri3}
-                alt="Tiny House 3"
-                className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-              />
+              alt="Tiny House 3"
+              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
+            />
             )}
             {randomImages.galeri4 && (
-              <img
+            <img
                 src={randomImages.galeri4}
-                alt="Tiny House 4"
-                className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-              />
+              alt="Tiny House 4"
+              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
+            />
             )}
           </div>
         </div>
@@ -235,11 +235,11 @@ export default function Home() {
             </div>
             <div className="flex items-start gap-4 bg-white/80 rounded-2xl shadow p-6 hover:shadow-lg transition">
               <span className="text-3xl text-[#FF6B6B]">🌱</span>
-              <div>
+                <div>
                 <h3 className="font-semibold text-xl mb-1 text-gray-900">Doğaya Saygılı Üretim</h3>
                 <p className="text-gray-700">Sürdürülebilir ve çevre dostu malzemeler kullanıyoruz.</p>
               </div>
-            </div>
+                </div>
             <div className="flex items-start gap-4 bg-white/80 rounded-2xl shadow p-6 hover:shadow-lg transition">
               <span className="text-3xl text-[#FF6B6B]">🤝</span>
               <div>
@@ -256,7 +256,7 @@ export default function Home() {
             </div>
             <div className="flex items-start gap-4 bg-white/80 rounded-2xl shadow p-6 hover:shadow-lg transition md:col-span-2">
               <span className="text-3xl text-[#FF6B6B]">💡</span>
-              <div>
+                <div>
                 <h3 className="font-semibold text-xl mb-1 text-gray-900">Yenilikçi Çözümler</h3>
                 <p className="text-gray-700">Akıllı depolama, enerji verimliliği ve modern mimariyi bir araya getiriyoruz.</p>
               </div>

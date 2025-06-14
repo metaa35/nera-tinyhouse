@@ -77,13 +77,13 @@ export default function Hakkimizda() {
         {/* Altında geniş görsel */}
         <div className="w-full mb-20">
           {randomImages.main && (
-            <Image
+          <Image
               src={randomImages.main}
-              alt="Tiny House İnşaat"
-              width={1600}
-              height={600}
-              className="rounded-3xl w-full object-cover"
-            />
+            alt="Tiny House İnşaat"
+            width={1600}
+            height={600}
+            className="rounded-3xl w-full object-cover"
+          />
           )}
         </div>
         {/* Ekibimiz Bölümü */}
@@ -97,11 +97,11 @@ export default function Hakkimizda() {
                 )}
                 <div className="font-bold text-lg text-gray-900">{team[i]?.name || `Ekip Üyesi ${i+1}`}</div>
                 <div className="text-gray-600">{team[i]?.role || ''}</div>
-              </div>
+            </div>
             ))}
           </div>
         </div>
-      </div>
+            </div>
       {/* SSS Bölümü */}
       <section className="w-full py-20 bg-gradient-to-b from-white to-gray-50 flex justify-center">
         <div className="max-w-3xl w-full flex flex-col items-center px-4">

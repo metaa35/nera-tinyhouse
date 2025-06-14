@@ -56,7 +56,7 @@ export default function NewProject() {
       if (data.project && data.project.id) {
         router.push(`/admin/projeler/${data.project.id}/duzenle`)
       } else {
-        router.push('/admin/projeler')
+      router.push('/admin/projeler')
       }
     } catch (error) {
       alert('Proje eklenirken bir hata oluştu')
