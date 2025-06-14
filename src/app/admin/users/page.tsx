@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User } from '@/types/user';
 import Image from 'next/image';
 
-export default function UserManagement({ children }: { children?: React.ReactNode }) {
+export default function UserManagement() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
