@@ -87,7 +87,7 @@ export default function Home() {
       </div>
 
       {/* Kutucuklar Bölümü */}
-      <div className="w-full flex justify-center -mt-72 mb-12 z-10 relative">
+      <div className="w-full flex justify-center md:-mt-72 -mt-8 mb-12 z-10 relative">
         <div className="w-full max-w-5xl flex flex-col md:flex-row gap-4 px-4">
           <div className="flex-1 bg-white/20 backdrop-blur-sm rounded-md p-6 text-center text-white shadow">
             <h3 className="font-bold text-xl mb-2">Hayatınızı Hafifletin</h3>
