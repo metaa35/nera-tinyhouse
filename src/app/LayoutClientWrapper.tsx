@@ -2,9 +2,11 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 
 export default function LayoutClientWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   if (pathname.startsWith('/admin')) {
     return <>{children}</>;
   }
@@ -15,7 +17,7 @@ export default function LayoutClientWrapper({ children }: { children: React.Reac
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#FF6B6B]/10 h-32">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-32">
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
               <img src="/logo.svg" alt="Nera Yapı" width={128} height={128} className="w-32 h-32" />
             </Link>
             <div className="hidden md:flex items-center space-x-8">
@@ -25,13 +27,24 @@ export default function LayoutClientWrapper({ children }: { children: React.Reac
               <Link href="/iletisim" className="text-[#2D3436] hover:text-[#FF6B6B] transition-colors duration-300">İletişim</Link>
               <Link href="/iletisim" className="px-6 py-2 bg-[#FF6B6B] text-white hover:bg-[#FF5252] transition-colors duration-300">Ücretsiz Keşif</Link>
             </div>
-            <button className="md:hidden text-[#2D3436] hover:text-[#FF6B6B] transition-colors duration-300">
+            <button className="md:hidden text-[#2D3436] hover:text-[#FF6B6B] transition-colors duration-300" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
           </div>
         </div>
+        {/* Mobil Menü */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-8 text-2xl">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="text-[#2D3436] hover:text-[#FF6B6B]">Ana Sayfa</Link>
+            <Link href="/hakkimizda" onClick={() => setMobileMenuOpen(false)} className="text-[#2D3436] hover:text-[#FF6B6B]">Hakkımızda</Link>
+            <Link href="/projeler" onClick={() => setMobileMenuOpen(false)} className="text-[#2D3436] hover:text-[#FF6B6B]">Projeler</Link>
+            <Link href="/iletisim" onClick={() => setMobileMenuOpen(false)} className="text-[#2D3436] hover:text-[#FF6B6B]">İletişim</Link>
+            <Link href="/iletisim" onClick={() => setMobileMenuOpen(false)} className="px-6 py-2 bg-[#FF6B6B] text-white rounded hover:bg-[#FF5252]">Ücretsiz Keşif</Link>
+            <button onClick={() => setMobileMenuOpen(false)} className="mt-8 text-[#FF6B6B] text-lg">Kapat</button>
+          </div>
+        )}
       </nav>
       <main className="pt-20">{children}</main>
       {/* GENEL FOOTER */}
