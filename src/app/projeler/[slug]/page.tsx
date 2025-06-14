@@ -4,15 +4,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-export default function ProjectDetailPage({ params }: { params: { id: string } }) {
+export default function ProjectDetailPage({ params }: { params: { slug: string } }) {
   const [project, setProject] = useState<any | null>(null)
   useEffect(() => {
-    fetch(`/api/projeler?id=${params.id}`)
+    fetch(`/api/projeler?slug=${params.slug}`)
       .then(res => res.json())
       .then((data) => {
         setProject(data || null)
       })
-  }, [params.id])
+  }, [params.slug])
 
   if (!project) return <div className="min-h-screen flex items-center justify-center">Proje bulunamadı veya yükleniyor...</div>
 
