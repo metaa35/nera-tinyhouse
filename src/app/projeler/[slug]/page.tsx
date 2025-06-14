@@ -4,7 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-export default function ProjectDetailPage({ params }: { params: { slug: string } }) {
+type Props = {
+  params: { slug: string }
+};
+
+export default function ProjectDetailPage({ params }: Props) {
   const [project, setProject] = useState<any | null>(null)
   useEffect(() => {
     fetch(`/api/projeler?slug=${params.slug}`)
