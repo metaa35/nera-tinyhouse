@@ -27,10 +27,21 @@ export default function LayoutClientWrapper({ children }: { children: React.Reac
               <Link href="/iletisim" className="text-[#2D3436] hover:text-[#FF6B6B] transition-colors duration-300">İletişim</Link>
               <Link href="/iletisim" className="px-6 py-2 bg-[#FF6B6B] text-white hover:bg-[#FF5252] transition-colors duration-300">Ücretsiz Keşif</Link>
             </div>
-            <button className="md:hidden text-[#2D3436] hover:text-[#FF6B6B] transition-colors duration-300" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <button
+              className="md:hidden p-2 rounded-full bg-white/80 shadow hover:bg-[#FF6B6B]/10 transition"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                // X (kapat) ikonu
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                // Hamburger (bars) ikonu
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
