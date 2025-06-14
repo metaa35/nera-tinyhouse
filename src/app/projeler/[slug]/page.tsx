@@ -3,20 +3,21 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 
-type Props = {
-  params: { slug: string }
-};
-
-export default function ProjectDetailPage({ params }: Props) {
+export default function ProjectDetailPage() {
+  const params = useParams()
+  const slug = params && typeof params.slug === 'string' ? params.slug : ''
   const [project, setProject] = useState<any | null>(null)
+
   useEffect(() => {
-    fetch(`/api/projeler?slug=${params.slug}`)
+    if (!slug) return
+    fetch(`/api/projeler?slug=${slug}`)
       .then(res => res.json())
       .then((data) => {
         setProject(data || null)
       })
-  }, [params.slug])
+  }, [slug])
 
   if (!project) return <div className="min-h-screen flex items-center justify-center">Proje bulunamadı veya yükleniyor...</div>
 
