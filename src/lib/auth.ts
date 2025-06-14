@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
   session: {
     strategy: "jwt",
   },
@@ -18,34 +19,49 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email ve şifre gerekli")
-        }
-
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
+        try {
+          console.log("Authorize başladı:", credentials?.email)
+          
+          if (!credentials?.email || !credentials?.password) {
+            console.log("Email veya şifre eksik")
+            throw new Error("Email ve şifre gerekli")
           }
-        })
 
-        if (!user) {
-          throw new Error("Kullanıcı bulunamadı")
-        }
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          })
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
+          console.log("Bulunan kullanıcı:", user)
 
-        if (!isPasswordValid) {
-          throw new Error("Geçersiz şifre")
-        }
+          if (!user) {
+            console.log("Kullanıcı bulunamadı")
+            throw new Error("Kullanıcı bulunamadı")
+          }
 
-        return {
-          id: user.id.toString(),
-          email: user.email,
-          name: user.name,
-          role: user.role,
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          )
+
+          console.log("Şifre doğrulama sonucu:", isPasswordValid)
+
+          if (!isPasswordValid) {
+            console.log("Geçersiz şifre")
+            throw new Error("Geçersiz şifre")
+          }
+
+          console.log("Giriş başarılı, kullanıcı dönüyor")
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
+        } catch (error) {
+          console.error("Authorize hatası:", error)
+          throw error
         }
       }
     })
