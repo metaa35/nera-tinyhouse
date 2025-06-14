@@ -7,8 +7,11 @@ import LayoutClientWrapper from './LayoutClientWrapper';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Nera",
-  description: "Modern web sitesi",
+  title: "NERA YAPI",
+  description: "NERA YAPI",
+  icons: {
+    icon: "/logo.svg"
+  }
 };
 
 export default function RootLayout({
@@ -18,6 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" className="scroll-smooth">
+      <head />
       <body className={inter.className}>
         <Providers>
           <LayoutClientWrapper>
