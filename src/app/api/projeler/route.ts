@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     console.log('Gelen veri:', data)
-    const { title, slug, description, content, images = [], features = [] } = data
+    const { title, slug, description, content, images = [], features = [], area, location, price } = data
     
     if (!title || !slug || !description) {
       return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
@@ -60,6 +60,10 @@ export async function POST(request: Request) {
         slug,
         description,
         content: content || '',
+        area,
+        location,
+        price,
+        features,
         images: {
           create: images.map((url: string) => ({ url }))
         },
