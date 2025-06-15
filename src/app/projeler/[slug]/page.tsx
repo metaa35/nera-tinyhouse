@@ -37,11 +37,11 @@ export default function ProjectDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Sol Kolon - Görseller */}
           <div className="space-y-4">
-            {project.images && project.images.length > 0 && (
+            {project.images && project.images.length > 0 ? (
               <>
                 <div className="relative h-96 rounded-lg overflow-hidden">
                   <Image
-                    src={project.coverImage || project.images[0]}
+                    src={project.coverImage || project.images[0] || '/placeholder.jpg'}
                     alt={project.title}
                     fill
                     className="object-cover"
@@ -52,7 +52,7 @@ export default function ProjectDetailPage() {
                     {project.images.filter((img: string) => img !== (project.coverImage || project.images[0])).map((image: string, index: number) => (
                       <div key={index} className="relative h-32 rounded-lg overflow-hidden">
                         <Image
-                          src={image}
+                          src={image || '/placeholder.jpg'}
                           alt={`${project.title} - Görsel ${index + 2}`}
                           fill
                           className="object-cover"
@@ -62,6 +62,10 @@ export default function ProjectDetailPage() {
                   </div>
                 )}
               </>
+            ) : (
+              <div className="relative h-96 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                <span className="text-gray-400">Görsel Yok</span>
+              </div>
             )}
           </div>
 
@@ -73,15 +77,15 @@ export default function ProjectDetailPage() {
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="bg-gray-50 p-4 rounded-lg text-center">
                 <div className="text-sm text-gray-500 mb-1">Metrekare</div>
-                <div className="text-xl font-semibold">{project.area}m²</div>
+                <div className="text-xl font-semibold">{project.area ? `${project.area}m²` : '-'}</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg text-center">
                 <div className="text-sm text-gray-500 mb-1">Konum</div>
-                <div className="text-xl font-semibold">{project.location}</div>
+                <div className="text-xl font-semibold">{project.location || '-'}</div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg text-center">
                 <div className="text-sm text-gray-500 mb-1">Fiyat</div>
-                <div className="text-xl font-semibold">{project.price?.toLocaleString('tr-TR')} TL</div>
+                <div className="text-xl font-semibold">{project.price ? `${project.price.toLocaleString('tr-TR')} TL` : '-'}</div>
               </div>
             </div>
 
