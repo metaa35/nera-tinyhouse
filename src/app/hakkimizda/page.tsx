@@ -10,6 +10,7 @@ interface TeamMember {
   position: string
   image: string
   description: string
+  photo?: string
 }
 
 export default function Hakkimizda() {
@@ -114,7 +115,7 @@ export default function Hakkimizda() {
               <div key={member.id} className="flex flex-col items-center bg-gray-100 rounded-2xl p-6">
                 <div className="relative h-28 w-28 mb-4">
                   <Image
-                    src={member.image}
+                    src={member.photo || '/placeholder-profile.png'}
                     alt={member.name}
                     fill
                     className="rounded-full object-cover"
