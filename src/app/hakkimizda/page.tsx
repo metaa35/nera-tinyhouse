@@ -19,7 +19,7 @@ export default function Hakkimizda() {
   const [faqs, setFaqs] = useState<{question: string, answer: string}[]>([]);
 
   useEffect(() => {
-    fetch('/api/ekip')
+    fetch('/api/team')
       .then(res => res.json())
       .then(data => {
         setTeamMembers(data)
