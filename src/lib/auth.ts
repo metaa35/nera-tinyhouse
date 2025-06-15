@@ -14,21 +14,28 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log("GELEN CREDENTIALS:", credentials)
         if (!credentials?.email || !credentials?.password) {
+          console.log("Eksik bilgi")
           throw new Error("Email ve şifre gerekli")
         }
         // Veritabanında kullanıcıyı bul
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         })
+        console.log("BULUNAN USER:", user)
         if (!user) {
+          console.log("Kullanıcı bulunamadı")
           throw new Error("Kullanıcı bulunamadı")
         }
         // Şifreyi karşılaştır
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+        console.log("ŞİFRE DOĞRU MU:", isPasswordValid)
         if (!isPasswordValid) {
+          console.log("Geçersiz şifre")
           throw new Error("Geçersiz şifre")
         }
+        console.log("GİRİŞ BAŞARILI!", user.email)
         return {
           id: String(user.id),
           email: user.email,
