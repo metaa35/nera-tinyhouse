@@ -1,6 +1,5 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 import LayoutClientWrapper from "@/components/LayoutClientWrapper";
 import type { Metadata } from "next";
 
@@ -23,11 +22,9 @@ export default function RootLayout({
     <html lang="tr" className="scroll-smooth">
       <head />
       <body className={inter.className}>
-        <SessionProvider>
-          <LayoutClientWrapper>
-            {children}
-          </LayoutClientWrapper>
-        </SessionProvider>
+        <LayoutClientWrapper>
+          {children}
+        </LayoutClientWrapper>
       </body>
     </html>
   );
