@@ -20,6 +20,10 @@ model Project {
   description String   @db.Text
   content     String   @db.Text
   images      Image[]
+  area        Int?
+  location    String?
+  price       Int?
+  features    String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
