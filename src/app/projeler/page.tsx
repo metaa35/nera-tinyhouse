@@ -64,7 +64,7 @@ export default function ProjectsPage() {
                     ))}
                   </div>
                   <Link 
-                    href={`/projeler/${project.id}`}
+                    href={`/projeler/${project.slug}`}
                     className="inline-flex items-center text-[#FF6B6B] hover:text-[#FF5252] transition-colors duration-300"
                   >
                     Detayları Gör
