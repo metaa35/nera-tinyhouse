@@ -5,8 +5,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { shuffleArray } from '@/utils/array';
 
+interface Project {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  images: string[];
+  coverImage: string;
+  features: string[];
+}
+
 export default function Home() {
   const [randomImages, setRandomImages] = useState<{[key: string]: string}>({});
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     fetch("/api/projeler")
@@ -43,6 +55,7 @@ export default function Home() {
           };
           setRandomImages(newRandomImages);
         }
+        setProjects(projects);
       });
   }, []);
 
@@ -181,42 +194,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tiny House Galerisi Bölümü */}
-      <section className="w-full py-24 bg-white flex justify-center">
-        <div className="max-w-7xl w-full flex flex-col items-center px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 text-center">İlham Veren Tiny House Projeleri</h2>
-          <p className="text-lg text-gray-600 mb-12 text-center max-w-2xl">
-            Gerçekleşen hayallerden ilham alın, kendi tiny house'unuz için fikir edinin.
-          </p>
-          <div className="w-full flex flex-col md:flex-row gap-6 justify-center">
-            {randomImages.galeri1 && (
-            <img
-                src={randomImages.galeri1}
-              alt="Tiny House 1"
-              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-            />
-            )}
-            {randomImages.galeri2 && (
-            <img
-                src={randomImages.galeri2}
-              alt="Tiny House 2"
-              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-            />
-            )}
-            {randomImages.galeri3 && (
-            <img
-                src={randomImages.galeri3}
-              alt="Tiny House 3"
-              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-            />
-            )}
-            {randomImages.galeri4 && (
-            <img
-                src={randomImages.galeri4}
-              alt="Tiny House 4"
-              className="rounded-3xl object-cover w-full md:w-1/4 h-96"
-            />
-            )}
+      {/* İlham Veren Tiny House Projeleri */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">İlham Veren Tiny House Projeleri</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projects.slice(0, 3).map((project) => (
+              <div key={project.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="relative h-64">
+                  <Image
+                    src={project.coverImage || project.images[0]}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
+                  <p className="text-gray-600 mb-4">{project.description}</p>
+                  <Link
+                    href={`/projeler/${project.slug}`}
+                    className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Detayları Gör
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

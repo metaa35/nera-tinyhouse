@@ -4,15 +4,31 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { shuffleArray } from '@/utils/array'
 
+interface TeamMember {
+  id: number
+  name: string
+  position: string
+  image: string
+  description: string
+}
+
 export default function Hakkimizda() {
-  const [team, setTeam] = useState<any[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [loading, setLoading] = useState(true)
   const [randomImages, setRandomImages] = useState<{[key: string]: string}>({});
   const [faqs, setFaqs] = useState<{question: string, answer: string}[]>([]);
 
   useEffect(() => {
-    fetch('/api/team')
+    fetch('/api/ekip')
       .then(res => res.json())
-      .then(data => setTeam(Array.isArray(data) ? data : []))
+      .then(data => {
+        setTeamMembers(data)
+        setLoading(false)
+      })
+      .catch(error => {
+        console.error('Ekip üyeleri yüklenirken hata:', error)
+        setLoading(false)
+      })
   }, [])
 
   useEffect(() => {
@@ -52,6 +68,10 @@ export default function Hakkimizda() {
       .then(data => setFaqs(Array.isArray(data) ? data : []));
   }, []);
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Yükleniyor...</div>
+  }
+
   return (
     <main className="w-full min-h-screen bg-white py-16">
       <div className="max-w-7xl mx-auto px-4">
@@ -90,14 +110,19 @@ export default function Hakkimizda() {
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">Hayalinizi Gerçeğe Dönüştüren Ekip</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {[0,1,2].map((i) => (
-              <div key={i} className="flex flex-col items-center bg-gray-100 rounded-2xl p-6">
-                {randomImages[`ekip${i+1}`] && (
-                  <img src={randomImages[`ekip${i+1}`]} alt={`Ekip Üyesi ${i+1}`} className="w-28 h-28 rounded-full object-cover mb-4" />
-                )}
-                <div className="font-bold text-lg text-gray-900">{team[i]?.name || `Ekip Üyesi ${i+1}`}</div>
-                <div className="text-gray-600">{team[i]?.role || ''}</div>
-            </div>
+            {teamMembers.map((member) => (
+              <div key={member.id} className="flex flex-col items-center bg-gray-100 rounded-2xl p-6">
+                <div className="relative h-28 w-28 mb-4">
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    fill
+                    className="rounded-full object-cover"
+                  />
+                </div>
+                <div className="font-bold text-lg text-gray-900">{member.name}</div>
+                <div className="text-gray-600">{member.position}</div>
+              </div>
             ))}
           </div>
         </div>
