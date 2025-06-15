@@ -24,9 +24,6 @@ export default function Navbar() {
             <Link href="/projeler" className="text-gray-700 hover:text-blue-600 transition-colors">
               Projeler
             </Link>
-            <Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Blog
-            </Link>
             <Link href="/hakkimizda" className="text-gray-700 hover:text-blue-600 transition-colors">
               Hakkımızda
             </Link>
@@ -81,13 +78,6 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Projeler
-            </Link>
-            <Link
-              href="/blog"
-              className="block text-gray-700 hover:text-blue-600 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blog
             </Link>
             <Link
               href="/hakkimizda"
