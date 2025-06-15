@@ -74,14 +74,14 @@ export default function Hakkimizda() {
   }
 
   return (
-    <main className="w-full min-h-screen bg-white py-16">
+    <main className="w-full min-h-screen bg-white pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4">
         {/* Başlık */}
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-12">
+        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-12 mt-0">
           Doğayla Bütünleşen Hayaller
         </h1>
         {/* İki sütun metin */}
-        <div className="flex flex-col md:flex-row gap-12 mb-12">
+        <div className="flex flex-col md:flex-row gap-12 mb-12 mt-8">
           <div className="flex-1">
             <h2 className="font-bold text-lg mb-2">Vizyonumuz</h2>
             <p className="text-gray-700">
