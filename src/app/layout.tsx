@@ -3,7 +3,6 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import LayoutClientWrapper from "@/components/LayoutClientWrapper";
 import type { Metadata } from "next";
-import { usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,9 +19,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
-
   return (
     <html lang="tr" className="scroll-smooth">
       <head />
