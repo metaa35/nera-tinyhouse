@@ -4,18 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Project } from '@/types/project';
 import Link from 'next/link'
-import { useSession } from "next-auth/react";
 
 export default function AdminProjects() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [projects, setProjects] = useState<any[]>([])
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/admin/login");
-    }
-  }, [status, router]);
-  if (status === "loading") return <div>Yükleniyor...</div>;
   useEffect(() => {
     fetch('/api/projeler')
       .then(res => res.json())

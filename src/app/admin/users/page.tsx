@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/types/user';
 import Image from 'next/image';
-import { useSession } from "next-auth/react";
 
 export default function UserManagement() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,12 +14,6 @@ export default function UserManagement() {
   const [saving, setSaving] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editSaving, setEditSaving] = useState(false);
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/admin/login");
-    }
-  }, [status, router]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -89,8 +81,6 @@ export default function UserManagement() {
       setEditSaving(false);
     }
   };
-
-  if (status === "loading") return <div>Yükleniyor...</div>;
 
   if (loading) {
     return (
