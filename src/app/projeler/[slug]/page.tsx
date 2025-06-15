@@ -22,7 +22,7 @@ export default function ProjectDetailPage() {
   if (!project) return <div className="min-h-screen flex items-center justify-center">Proje bulunamadı veya yükleniyor...</div>
 
   return (
-    <main className="min-h-screen py-20">
+    <main className="min-h-screen py-20 bg-gray-50 text-gray-900">
       <div className="max-w-7xl mx-auto px-4">
         <Link
           href="/projeler"
