@@ -6,9 +6,21 @@ const prisma = new PrismaClient()
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
+  const slug = searchParams.get('slug')
   if (id) {
     const project = await prisma.project.findUnique({
       where: { id: Number(id) },
+      include: { images: true }
+    })
+    if (!project) return NextResponse.json(null, { status: 404 })
+    return NextResponse.json({
+      ...project,
+      images: project.images.map(img => img.url),
+      coverImage: project.images[0]?.url || '',
+    })
+  } else if (slug) {
+    const project = await prisma.project.findUnique({
+      where: { slug },
       include: { images: true }
     })
     if (!project) return NextResponse.json(null, { status: 404 })
