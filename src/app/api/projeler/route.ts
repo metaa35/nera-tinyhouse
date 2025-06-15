@@ -33,26 +33,37 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const data = await request.json()
-  const { title, slug, description, content, images = [], features = [] } = data
-  const project = await prisma.project.create({
-    data: {
-      title,
-      slug,
-      description,
-      content: content || '',
-      images: {
-        create: images.map((url: string) => ({ url }))
+  try {
+    const data = await request.json()
+    console.log('Gelen veri:', data)
+    const { title, slug, description, content, images = [], features = [] } = data
+    
+    if (!title || !slug || !description) {
+      return NextResponse.json({ error: 'Eksik veri' }, { status: 400 })
+    }
+
+    const project = await prisma.project.create({
+      data: {
+        title,
+        slug,
+        description,
+        content: content || '',
+        images: {
+          create: images.map((url: string) => ({ url }))
+        },
       },
-      // features alanı ayrı tabloya alınabilir, şimdilik string[] olarak tutulabilir
-    },
-    include: { images: true }
-  })
-  return NextResponse.json({ success: true, project: {
-    ...project,
-    images: project.images.map(img => img.url),
-    coverImage: project.images[0]?.url || '',
-  } })
+      include: { images: true }
+    })
+    
+    return NextResponse.json({ success: true, project: {
+      ...project,
+      images: project.images.map((img: { url: string }) => img.url),
+      coverImage: project.images[0]?.url || '',
+    }})
+  } catch (error: any) {
+    console.error('Proje oluşturma hatası:', error)
+    return NextResponse.json({ error: 'Proje oluşturulamadı', details: error.message }, { status: 500 })
+  }
 }
 
 export async function PUT(request: Request) {
