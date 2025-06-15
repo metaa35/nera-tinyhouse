@@ -96,6 +96,13 @@ export default function AdminProjects() {
                     >
                       Düzenle
                     </Link>
+                    <Link
+                      href={`/projeler/${project.slug}`}
+                      className="font-medium text-green-600 hover:text-green-500 mr-4"
+                      target="_blank"
+                    >
+                      Detayları Gör
+                    </Link>
                     <button
                       type="button"
                       className="font-medium text-red-600 hover:text-red-500"
