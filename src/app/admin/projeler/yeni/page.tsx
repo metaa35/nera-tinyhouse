@@ -17,6 +17,7 @@ export default function NewProject() {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     description: '',
     price: '',
     area: '',
@@ -29,10 +30,21 @@ export default function NewProject() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [name]: value,
+      }
+      // Başlık değiştiğinde otomatik slug oluştur
+      if (name === 'title') {
+        const slug = value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
+        newData.slug = slug
+      }
+      return newData
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +101,7 @@ export default function NewProject() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white shadow sm:rounded-lg p-6 grid grid-cols-1 gap-6">
           <input type="text" name="title" placeholder="Başlık" value={formData.title} onChange={handleChange} required className="border p-2 rounded" />
+          <input type="text" name="slug" placeholder="Slug (URL için kullanılacak benzersiz isim)" value={formData.slug} onChange={handleChange} required className="border p-2 rounded" />
           <textarea name="description" placeholder="Açıklama" value={formData.description} onChange={handleChange} required className="border p-2 rounded" />
           <input type="number" name="price" placeholder="Fiyat (TL)" value={formData.price} onChange={handleChange} required className="border p-2 rounded" />
           <input type="number" name="area" placeholder="Metrekare" value={formData.area} onChange={handleChange} required className="border p-2 rounded" />
