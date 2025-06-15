@@ -3,38 +3,42 @@
 import { useRouter, useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 
-const defaultFeatures = [
-  "Güneş enerjisi sistemi",
-  "Kompost tuvalet",
-  "İzolasyonlu duvarlar",
-  "Yağmur suyu toplama sistemi",
-  "Doğal havalandırma",
-  "Ahşap dış cephe"
-]
-
 export default function EditProject() {
   const router = useRouter()
   const params = useParams()
-  const id = params && params.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : ''
-  const [formData, setFormData] = useState<any | null>(null)
-  const [loading, setLoading] = useState(false)
+  const slug = params?.slug
+  const [formData, setFormData] = useState<any>({
+    title: '',
+    slug: '',
+    description: '',
+    content: '',
+    images: [],
+    features: []
+  })
+  const [loading, setLoading] = useState(true)
   const [images, setImages] = useState<string[]>([])
   const [coverImage, setCoverImage] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(`/api/projeler?id=${id}`)
+    if (!slug) return
+    fetch(`/api/projeler?slug=${slug}`)
       .then(res => res.json())
       .then((project) => {
         if (project) {
           setFormData({
             ...project,
-            features: Array.isArray(project.features) ? project.features.join(', ') : (project.features || '')
+            features: Array.isArray(project.features) ? project.features.join(', ') : ''
           })
-          setImages(Array.isArray(project.images) ? project.images : (project.image ? [project.image] : []))
+          setImages(Array.isArray(project.images) ? project.images : [])
           setCoverImage(project.coverImage || (Array.isArray(project.images) ? project.images[0] : null))
         }
+        setLoading(false)
       })
-  }, [id])
+      .catch(error => {
+        console.error('Proje yüklenirken hata:', error)
+        setLoading(false)
+      })
+  }, [slug])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -44,32 +48,25 @@ export default function EditProject() {
     }))
   }
 
-  const handleFeatureChange = (idx: number) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      features: prev.features.map((f: any, i: number) => i === idx ? { ...f, checked: !f.checked } : f)
-    }))
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await fetch('/api/projeler', {
+      const response = await fetch('/api/projeler', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          id: Number(id),
-          price: Number(formData.price),
-          area: Number(formData.area),
+          slug,
           images,
           coverImage: coverImage || images[0] || '',
           features: typeof formData.features === 'string' ? formData.features.split(',').map((f: string) => f.trim()).filter(Boolean) : []
         }),
       })
+      if (!response.ok) throw new Error('Proje güncellenirken bir hata oluştu')
       router.push('/admin/projeler')
     } catch (error) {
+      console.error('Güncelleme hatası:', error)
       alert('Proje güncellenirken bir hata oluştu')
     } finally {
       setLoading(false)
@@ -96,21 +93,23 @@ export default function EditProject() {
 
   const handleRemoveImage = (url: string) => {
     setImages(prev => prev.filter(img => img !== url))
+    if (coverImage === url) {
+      setCoverImage(images[0] || null)
+    }
   }
 
-  if (!formData) return <div>Yükleniyor...</div>
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Yükleniyor...</div>
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Proje Düzenle: {formData?.title || id}</h2>
+      <h2 className="text-2xl font-bold">Proje Düzenle: {formData?.title || slug}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input type="text" name="title" placeholder="Başlık" value={formData.title} onChange={handleChange} required className="border p-2 rounded w-full" />
         <input type="text" name="slug" placeholder="Slug (url)" value={formData.slug} onChange={handleChange} required className="border p-2 rounded w-full" />
         <textarea name="description" placeholder="Açıklama" value={formData.description} onChange={handleChange} required className="border p-2 rounded w-full" />
-        <input type="number" name="price" placeholder="Fiyat (TL)" value={formData.price} onChange={handleChange} required className="border p-2 rounded w-full" />
-        <input type="number" name="area" placeholder="Metrekare" value={formData.area} onChange={handleChange} required className="border p-2 rounded w-full" />
-        <input type="text" name="location" placeholder="Konum" value={formData.location} onChange={handleChange} required className="border p-2 rounded w-full" />
+        <textarea name="content" placeholder="İçerik" value={formData.content} onChange={handleChange} className="border p-2 rounded w-full" />
         <input type="file" accept="image/*" multiple onChange={handleFileChange} className="border p-2 rounded w-full" />
+        
         {images.length > 0 && (
           <div className="flex gap-2 flex-wrap mt-2">
             {images.map((img, i) => (
@@ -122,7 +121,9 @@ export default function EditProject() {
             ))}
           </div>
         )}
+        
         <textarea name="features" placeholder="Özellikler (virgül ile ayırarak yazın: Özellik1, Özellik2, ... )" value={formData.features} onChange={handleChange} className="border p-2 rounded w-full" />
+        
         <div className="flex justify-end space-x-3">
           <button type="button" onClick={() => router.back()} className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">İptal</button>
           <button type="submit" disabled={loading} className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">{loading ? "Kaydediliyor..." : "Kaydet"}</button>
