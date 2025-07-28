@@ -58,9 +58,15 @@ export default function AdminGaleriPage() {
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
-          // Video dosyaları için progress bar ile upload
-          console.log('Video uploading with progress...')
+          // Video dosyaları için chunk upload
+          console.log('Video uploading with chunk system...')
           
+          const chunkSize = 2 * 1024 * 1024 // 2MB chunks
+          const chunks = Math.ceil(selectedFile.size / chunkSize)
+          
+          console.log(`Video size: ${(selectedFile.size / (1024 * 1024)).toFixed(2)}MB, Chunks: ${chunks}`)
+          
+          // Cloudinary chunk upload için signature
           const folder = 'gallery/videos'
           const timestamp = Math.round(new Date().getTime() / 1000)
           
@@ -69,6 +75,7 @@ export default function AdminGaleriPage() {
             folder,
             resource_type: 'video',
             allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+            chunk_size: chunkSize,
             eager: [
               { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
             ]
@@ -89,75 +96,35 @@ export default function AdminGaleriPage() {
           
           const signatureData = await signatureResponse.json()
           
-          // Progress bar ile upload
-          const xhr = new XMLHttpRequest()
-          
-          return new Promise((resolve, reject) => {
-            xhr.upload.addEventListener('progress', (e) => {
-              if (e.lengthComputable) {
-                const percentComplete = (e.loaded / e.total) * 100
-                setUploadProgress(percentComplete)
-                console.log(`Upload progress: ${percentComplete.toFixed(2)}%`)
-              }
-            })
-            
-            xhr.addEventListener('load', () => {
-              if (xhr.status === 200) {
-                try {
-                  const result = JSON.parse(xhr.responseText)
-                  mediaUrl = result.secure_url
-                  console.log('Video uploaded successfully:', mediaUrl)
-                  resolve(mediaUrl)
-                } catch (error) {
-                  reject(new Error('Upload response parse hatası'))
-                }
-              } else {
-                reject(new Error(`Upload failed: ${xhr.status}`))
-              }
-            })
-            
-            xhr.addEventListener('error', () => {
-              reject(new Error('Upload network hatası'))
-            })
-            
-            const formData = new FormData()
-            formData.append('file', selectedFile)
-            formData.append('timestamp', timestamp.toString())
-            formData.append('signature', signatureData.signature)
-            formData.append('api_key', signatureData.api_key)
-            formData.append('folder', folder)
-            formData.append('resource_type', 'video')
-            formData.append('eager', JSON.stringify([
-              { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-            ]))
-            
-            xhr.open('POST', signatureData.uploadUrl)
-            xhr.send(formData)
-          }).then(async (uploadedUrl) => {
-            // Medya kaydını oluştur
-            const response = await fetch('/api/media', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                ...formData,
-                url: uploadedUrl
-              }),
-            })
+          // Chunk upload
+          const formData = new FormData()
+          formData.append('file', selectedFile)
+          formData.append('timestamp', timestamp.toString())
+          formData.append('signature', signatureData.signature)
+          formData.append('api_key', signatureData.api_key)
+          formData.append('folder', folder)
+          formData.append('resource_type', 'video')
+          formData.append('chunk_size', chunkSize.toString())
+          formData.append('eager', JSON.stringify([
+            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+          ]))
 
-            if (response.ok) {
-              setFormData({ title: '', url: '', alt: '', type: 'IMAGE' })
-              setSelectedFile(null)
-              setShowUploadForm(false)
-              setUploadProgress(0)
-              fetchMedia()
-              alert('Video başarıyla yüklendi!')
-            } else {
-              const error = await response.json()
-              alert(error.error || 'Bir hata oluştu')
-            }
+          console.log('Starting chunk upload...')
+          
+          const uploadResponse = await fetch('/api/media/upload-chunk', {
+            method: 'POST',
+            body: formData,
           })
+
+          if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text()
+            console.error('Chunk upload error:', errorText)
+            throw new Error(`Video upload başarısız: ${uploadResponse.status} - ${errorText}`)
+          }
+
+          const uploadResult = await uploadResponse.json()
+          mediaUrl = uploadResult.secure_url
+          console.log('Video uploaded successfully:', mediaUrl)
           
         } else {
           // Resim dosyaları için normal upload
@@ -192,30 +159,28 @@ export default function AdminGaleriPage() {
         throw new Error('Dosya seçin veya URL girin')
       }
 
-      // Resim dosyaları için medya kaydını oluştur
-      if (formData.type === 'IMAGE') {
-        const response = await fetch('/api/media', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...formData,
-            url: mediaUrl
-          }),
-        })
+      // Medya kaydını oluştur
+      const response = await fetch('/api/media', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          url: mediaUrl
+        }),
+      })
 
-        if (response.ok) {
-          setFormData({ title: '', url: '', alt: '', type: 'IMAGE' })
-          setSelectedFile(null)
-          setShowUploadForm(false)
-          setUploadProgress(0)
-          fetchMedia()
-          alert('Medya başarıyla yüklendi!')
-        } else {
-          const error = await response.json()
-          alert(error.error || 'Bir hata oluştu')
-        }
+      if (response.ok) {
+        setFormData({ title: '', url: '', alt: '', type: 'IMAGE' })
+        setSelectedFile(null)
+        setShowUploadForm(false)
+        setUploadProgress(0)
+        fetchMedia()
+        alert('Medya başarıyla yüklendi!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Bir hata oluştu')
       }
     } catch (error) {
       console.error('Yükleme hatası:', error)
