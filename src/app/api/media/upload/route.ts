@@ -24,9 +24,46 @@ export async function POST(request: Request) {
     // Dosya boyutu kontrolü (Vercel limiti: 4.5MB)
     const VERCEL_LIMIT = 4.5 * 1024 * 1024
     
-    // Video dosyaları için her zaman direkt upload kullan
-    if (type === 'video' || file.size > VERCEL_LIMIT) {
-      // Büyük dosyalar için direkt Cloudinary upload URL'i döndür
+    // Video dosyaları için chunk upload kullan
+    if (type === 'video') {
+      // Video dosyalarını chunk'lara böl
+      const chunkSize = 4 * 1024 * 1024 // 4MB chunks
+      const chunks = Math.ceil(file.size / chunkSize)
+      
+      if (chunks > 1) {
+        // Büyük video dosyaları için direkt Cloudinary upload URL'i döndür
+        const folder = 'gallery/videos'
+        const timestamp = Math.round(new Date().getTime() / 1000)
+        
+        const params = {
+          timestamp,
+          folder,
+          resource_type: 'video',
+          allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+          chunk_size: chunkSize,
+          eager: [
+            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+          ]
+        }
+        
+        const signature = cloudinary.utils.api_sign_request(
+          params,
+          process.env.CLOUDINARY_API_SECRET!
+        )
+
+        return NextResponse.json({
+          uploadUrl: `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/video/upload`,
+          uploadParams: {
+            ...params,
+            signature
+          },
+          isDirectUpload: true
+        })
+      }
+    }
+    
+    // Büyük dosyalar için direkt upload
+    if (file.size > VERCEL_LIMIT) {
       const folder = type === 'video' ? 'gallery/videos' : 'gallery/images'
       const timestamp = Math.round(new Date().getTime() / 1000)
       
