@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface Media {
   id: number
@@ -17,17 +16,14 @@ export default function AdminGaleriPage() {
   const [loading, setLoading] = useState(true)
   const [showUploadForm, setShowUploadForm] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const router = useRouter()
-
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     url: '',
     alt: '',
     type: 'IMAGE' as 'IMAGE' | 'VIDEO'
   })
-
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
 
   useEffect(() => {
     fetchMedia()
@@ -41,7 +37,7 @@ export default function AdminGaleriPage() {
         setMedia(data)
       }
     } catch (error) {
-      console.error('Galeri yüklenirken hata:', error)
+      console.error('Medya yükleme hatası:', error)
     } finally {
       setLoading(false)
     }
@@ -57,7 +53,7 @@ export default function AdminGaleriPage() {
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
-          // Video dosyaları için direkt Cloudinary upload
+          // Video dosyaları için Cloudinary client-side upload
           const folder = 'gallery/videos'
           const timestamp = Math.round(new Date().getTime() / 1000)
           
@@ -87,34 +83,37 @@ export default function AdminGaleriPage() {
           
           const signatureData = await signatureResponse.json()
           
-          // Proxy üzerinden Cloudinary'ye yükle
-          const proxyFormData = new FormData()
-          proxyFormData.append('file', selectedFile)
-          proxyFormData.append('timestamp', timestamp.toString())
-          proxyFormData.append('signature', signatureData.signature)
-          proxyFormData.append('api_key', signatureData.api_key)
-          proxyFormData.append('folder', folder)
-          proxyFormData.append('resource_type', 'video')
-          proxyFormData.append('chunk_size', '6000000')
-          proxyFormData.append('eager', JSON.stringify([
+          // Client-side upload için URL oluştur
+          const uploadUrl = new URL(signatureData.uploadUrl)
+          uploadUrl.searchParams.append('timestamp', timestamp.toString())
+          uploadUrl.searchParams.append('signature', signatureData.signature)
+          uploadUrl.searchParams.append('api_key', signatureData.api_key)
+          uploadUrl.searchParams.append('folder', folder)
+          uploadUrl.searchParams.append('resource_type', 'video')
+          uploadUrl.searchParams.append('chunk_size', '6000000')
+          uploadUrl.searchParams.append('eager', JSON.stringify([
             { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
           ]))
 
-          console.log('Video uploading to Cloudinary via proxy...')
+          console.log('Video uploading to Cloudinary via client-side...')
           
-          const proxyResponse = await fetch('/api/media/upload-video', {
+          // Client-side upload
+          const clientFormData = new FormData()
+          clientFormData.append('file', selectedFile)
+
+          const clientResponse = await fetch(uploadUrl.toString(), {
             method: 'POST',
-            body: proxyFormData,
+            body: clientFormData,
           })
 
-          if (!proxyResponse.ok) {
-            const errorText = await proxyResponse.text()
-            console.error('Video upload error:', errorText)
-            throw new Error(`Video upload başarısız: ${proxyResponse.status} - ${errorText}`)
+          if (!clientResponse.ok) {
+            const errorText = await clientResponse.text()
+            console.error('Client upload error:', errorText)
+            throw new Error(`Video upload başarısız: ${clientResponse.status} - ${errorText}`)
           }
 
-          const proxyResult = await proxyResponse.json()
-          mediaUrl = proxyResult.secure_url
+          const clientResult = await clientResponse.json()
+          mediaUrl = clientResult.secure_url
           console.log('Video uploaded successfully:', mediaUrl)
           
         } else {
@@ -252,99 +251,82 @@ export default function AdminGaleriPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dosya Yükle veya URL Gir
-              </label>
-              <div className="space-y-2">
-                <input
-                  type="file"
-                  accept={formData.type === 'IMAGE' ? 'image/*' : 'video/*'}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      setSelectedFile(file)
-                      setFormData({ ...formData, url: '' }) // URL'yi temizle
-                    } else {
-                      setSelectedFile(null)
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <div className="text-sm text-gray-500">
-                  {formData.type === 'IMAGE' 
-                    ? 'Desteklenen formatlar: JPG, PNG, GIF, WebP' 
-                    : 'Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Büyük dosyalar otomatik sıkıştırılır)'
-                  }
-                </div>
-                {selectedFile && (
-                  <div className="text-sm text-green-600">
-                    Seçilen dosya: {selectedFile.name}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Veya URL Gir
-              </label>
-              <input
-                type="url"
-                value={formData.url}
-                onChange={(e) => {
-                  setFormData({ ...formData, url: e.target.value })
-                  if (e.target.value) {
-                    setSelectedFile(null) // Dosyayı temizle
-                  }
-                }}
-                placeholder="https://example.com/image.jpg"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={!!selectedFile}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Alt Text
-              </label>
-              <input
-                type="text"
-                value={formData.alt}
-                onChange={(e) => setFormData({ ...formData, alt: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tür *
+                Medya Türü *
               </label>
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as 'IMAGE' | 'VIDEO' })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               >
-                <option value="IMAGE">Fotoğraf</option>
+                <option value="IMAGE">Resim</option>
                 <option value="VIDEO">Video</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Dosya Seç
+              </label>
+              <input
+                type="file"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    setSelectedFile(file)
+                    setFormData({ ...formData, url: '' }) // URL'yi temizle
+                  } else {
+                    setSelectedFile(null)
+                  }
+                }}
+                accept={formData.type === 'IMAGE' ? 'image/*' : 'video/*'}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="text-sm text-gray-500">
+                {formData.type === 'IMAGE' 
+                  ? 'Desteklenen formatlar: JPG, PNG, GIF, WebP' 
+                  : 'Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Büyük dosyalar otomatik sıkıştırılır)'
+                }
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Veya URL Girin
+              </label>
+              <input
+                type="url"
+                value={formData.url}
+                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                placeholder="https://example.com/image.jpg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Alt Metin
+              </label>
+              <input
+                type="text"
+                value={formData.alt}
+                onChange={(e) => setFormData({ ...formData, alt: e.target.value })}
+                placeholder="Görsel açıklaması"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex gap-4">
               <button
                 type="submit"
-                disabled={uploading || (!selectedFile && !formData.url)}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                disabled={uploading}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 {uploading ? 'Yükleniyor...' : 'Yükle'}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowUploadForm(false)
-                  setSelectedFile(null)
-                  setFormData({ title: '', url: '', alt: '', type: 'IMAGE' })
-                }}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                onClick={() => setShowUploadForm(false)}
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
               >
                 İptal
               </button>
@@ -353,88 +335,45 @@ export default function AdminGaleriPage() {
         </div>
       )}
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-800">Fotoğraflar</h3>
-          <p className="text-3xl font-bold text-blue-600">{images.length}</p>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-800">Videolar</h3>
-          <p className="text-3xl font-bold text-green-600">{videos.length}</p>
-        </div>
-      </div>
-
       {/* Media List */}
-      <div className="space-y-6">
-        {/* Images */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Fotoğraflar</h2>
-          {images.length === 0 ? (
-            <p className="text-gray-500">Henüz fotoğraf yüklenmemiş.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {images.map((item) => (
-                <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden">
-                  <img
-                    src={item.url}
-                    alt={item.alt || item.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 mb-2">{item.title}</h3>
-                    {item.alt && (
-                      <p className="text-sm text-gray-600 mb-2">{item.alt}</p>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
-                      >
-                        Sil
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {media.map((item) => (
+          <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            {item.type === 'IMAGE' ? (
+              <img
+                src={item.url}
+                alt={item.alt || item.title}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <video
+                src={item.url}
+                controls
+                className="w-full h-48 object-cover"
+              />
+            )}
+            <div className="p-4">
+              <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+              {item.alt && <p className="text-gray-600 text-sm mb-2">{item.alt}</p>}
+              <p className="text-gray-500 text-xs mb-3">
+                {new Date(item.createdAt).toLocaleDateString('tr-TR')}
+              </p>
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+              >
+                Sil
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* Videos */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Videolar</h2>
-          {videos.length === 0 ? (
-            <p className="text-gray-500">Henüz video yüklenmemiş.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {videos.map((item) => (
-                <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden">
-                  <video
-                    src={item.url}
-                    className="w-full h-48 object-cover"
-                    controls
-                  />
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 mb-2">{item.title}</h3>
-                    {item.alt && (
-                      <p className="text-sm text-gray-600 mb-2">{item.alt}</p>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
-                      >
-                        Sil
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
+        ))}
       </div>
+
+      {media.length === 0 && !loading && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">Henüz medya dosyası yüklenmemiş.</p>
+        </div>
+      )}
     </div>
   )
 } 
