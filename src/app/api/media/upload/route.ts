@@ -21,11 +21,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Geçersiz dosya türü' }, { status: 400 })
     }
 
-    // Dosyayı buffer'a çevir
+    // Dosya boyutu kontrolü (Vercel limiti: 4.5MB)
+    const VERCEL_LIMIT = 4.5 * 1024 * 1024
+    
+    if (file.size > VERCEL_LIMIT) {
+      // Büyük dosyalar için direkt Cloudinary upload URL'i döndür
+      const folder = type === 'video' ? 'gallery/videos' : 'gallery/images'
+      const timestamp = Math.round(new Date().getTime() / 1000)
+      const signature = cloudinary.utils.api_sign_request(
+        {
+          timestamp,
+          folder,
+          resource_type: type === 'video' ? 'video' : 'image',
+          allowed_formats: type === 'video' 
+            ? ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'] 
+            : ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        },
+        process.env.CLOUDINARY_API_SECRET!
+      )
+
+      return NextResponse.json({
+        uploadUrl: `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/${type === 'video' ? 'video' : 'image'}/upload`,
+        uploadParams: {
+          timestamp,
+          signature,
+          folder,
+          resource_type: type === 'video' ? 'video' : 'image',
+          allowed_formats: type === 'video' 
+            ? ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'] 
+            : ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        },
+        isDirectUpload: true
+      })
+    }
+
+    // Küçük dosyalar için normal upload
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    // Cloudinary'ye yükle
     const uploadResult = await new Promise((resolve, reject) => {
       const folder = type === 'video' ? 'gallery/videos' : 'gallery/images'
       
@@ -38,6 +71,8 @@ export async function POST(request: Request) {
             : ['jpg', 'jpeg', 'png', 'gif', 'webp'],
           transformation: type === 'image' ? [
             { width: 1200, height: 800, crop: 'fill', quality: 'auto' }
+          ] : type === 'video' ? [
+            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
           ] : undefined
         }, 
         (err, result) => {
@@ -55,7 +90,8 @@ export async function POST(request: Request) {
       width: result.width,
       height: result.height,
       format: result.format,
-      resource_type: result.resource_type
+      resource_type: result.resource_type,
+      isDirectUpload: false
     })
 
   } catch (error) {

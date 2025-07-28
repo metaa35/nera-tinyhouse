@@ -83,7 +83,32 @@ export default function AdminGaleriPage() {
         }
 
         const uploadResult = await uploadResponse.json()
-        mediaUrl = uploadResult.url
+        
+        if (uploadResult.isDirectUpload) {
+          // Büyük dosyalar için direkt Cloudinary upload
+          const directFormData = new FormData()
+          directFormData.append('file', selectedFile)
+          
+          // Upload parametrelerini ekle
+          Object.keys(uploadResult.uploadParams).forEach(key => {
+            directFormData.append(key, uploadResult.uploadParams[key])
+          })
+
+          const directResponse = await fetch(uploadResult.uploadUrl, {
+            method: 'POST',
+            body: directFormData,
+          })
+
+          if (!directResponse.ok) {
+            throw new Error('Direkt upload başarısız oldu')
+          }
+
+          const directResult = await directResponse.json()
+          mediaUrl = directResult.secure_url
+        } else {
+          // Küçük dosyalar için normal upload
+          mediaUrl = uploadResult.url
+        }
       } else if (!formData.url) {
         throw new Error('Dosya seçin veya URL girin')
       }
@@ -197,9 +222,11 @@ export default function AdminGaleriPage() {
                   accept={formData.type === 'IMAGE' ? 'image/*' : 'video/*'}
                   onChange={(e) => {
                     const file = e.target.files?.[0]
-                    setSelectedFile(file || null)
                     if (file) {
+                      setSelectedFile(file)
                       setFormData({ ...formData, url: '' }) // URL'yi temizle
+                    } else {
+                      setSelectedFile(null)
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -207,7 +234,7 @@ export default function AdminGaleriPage() {
                 <div className="text-sm text-gray-500">
                   {formData.type === 'IMAGE' 
                     ? 'Desteklenen formatlar: JPG, PNG, GIF, WebP' 
-                    : 'Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM'
+                    : 'Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Büyük dosyalar otomatik sıkıştırılır)'
                   }
                 </div>
                 {selectedFile && (
