@@ -11,6 +11,12 @@ interface Media {
   createdAt: string
 }
 
+declare global {
+  interface Window {
+    cloudinary: any
+  }
+}
+
 export default function AdminGaleriPage() {
   const [media, setMedia] = useState<Media[]>([])
   const [loading, setLoading] = useState(true)
@@ -27,6 +33,11 @@ export default function AdminGaleriPage() {
 
   useEffect(() => {
     fetchMedia()
+    // Cloudinary widget script'ini yükle
+    const script = document.createElement('script')
+    script.src = 'https://upload-widget.cloudinary.com/global/all.js'
+    script.async = true
+    document.head.appendChild(script)
   }, [])
 
   const fetchMedia = async () => {
@@ -43,6 +54,39 @@ export default function AdminGaleriPage() {
     }
   }
 
+  const openCloudinaryWidget = () => {
+    if (!window.cloudinary) {
+      alert('Cloudinary widget yüklenemedi')
+      return
+    }
+
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: 'df770zzfr',
+        uploadPreset: 'ml_default',
+        folder: 'gallery/videos',
+        resourceType: 'video',
+        maxFileSize: 100000000, // 100MB
+        allowedFormats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+        eager: [
+          { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+        ]
+      },
+      (error: any, result: any) => {
+        if (!error && result && result.event === 'success') {
+          console.log('Video uploaded successfully:', result.info.secure_url)
+          setFormData({ ...formData, url: result.info.secure_url })
+          alert('Video başarıyla yüklendi!')
+        } else if (error) {
+          console.error('Upload error:', error)
+          alert('Video yükleme hatası: ' + error.message)
+        }
+      }
+    )
+
+    widget.open()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setUploading(true)
@@ -53,34 +97,10 @@ export default function AdminGaleriPage() {
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
-          // Video dosyaları için Cloudinary unsigned upload
-          console.log('Video uploading to Cloudinary via unsigned upload...')
-          
-          // Cloudinary unsigned upload
-          const unsignedFormData = new FormData()
-          unsignedFormData.append('file', selectedFile)
-          unsignedFormData.append('upload_preset', 'ml_default') // Cloudinary preset
-          unsignedFormData.append('folder', 'gallery/videos')
-          unsignedFormData.append('resource_type', 'video')
-          unsignedFormData.append('eager', JSON.stringify([
-            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-          ]))
-
-          const unsignedResponse = await fetch('https://api.cloudinary.com/v1_1/df770zzfr/video/upload', {
-            method: 'POST',
-            body: unsignedFormData,
-          })
-
-          if (!unsignedResponse.ok) {
-            const errorText = await unsignedResponse.text()
-            console.error('Unsigned upload error:', errorText)
-            throw new Error(`Video upload başarısız: ${unsignedResponse.status} - ${errorText}`)
-          }
-
-          const unsignedResult = await unsignedResponse.json()
-          mediaUrl = unsignedResult.secure_url
-          console.log('Video uploaded successfully:', mediaUrl)
-          
+          // Video dosyaları için Cloudinary widget kullan
+          openCloudinaryWidget()
+          setUploading(false)
+          return
         } else {
           // Resim dosyaları için normal upload
           const uploadFormData = new FormData()
@@ -228,31 +248,46 @@ export default function AdminGaleriPage() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dosya Seç
-              </label>
-              <input
-                type="file"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) {
-                    setSelectedFile(file)
-                    setFormData({ ...formData, url: '' }) // URL'yi temizle
-                  } else {
-                    setSelectedFile(null)
-                  }
-                }}
-                accept={formData.type === 'IMAGE' ? 'image/*' : 'video/*'}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <div className="text-sm text-gray-500">
-                {formData.type === 'IMAGE' 
-                  ? 'Desteklenen formatlar: JPG, PNG, GIF, WebP' 
-                  : 'Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Büyük dosyalar otomatik sıkıştırılır)'
-                }
+            {formData.type === 'VIDEO' ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Video Yükle
+                </label>
+                <button
+                  type="button"
+                  onClick={openCloudinaryWidget}
+                  className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
+                >
+                  Video Seçmek İçin Tıklayın
+                </button>
+                <div className="text-sm text-gray-500 mt-1">
+                  Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Maks. 100MB)
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Dosya Seç
+                </label>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setSelectedFile(file)
+                      setFormData({ ...formData, url: '' }) // URL'yi temizle
+                    } else {
+                      setSelectedFile(null)
+                    }
+                  }}
+                  accept="image/*"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="text-sm text-gray-500">
+                  Desteklenen formatlar: JPG, PNG, GIF, WebP
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
