@@ -24,7 +24,8 @@ export async function POST(request: Request) {
     // Dosya boyutu kontrolü (Vercel limiti: 4.5MB)
     const VERCEL_LIMIT = 4.5 * 1024 * 1024
     
-    if (file.size > VERCEL_LIMIT) {
+    // Video dosyaları için her zaman direkt upload kullan
+    if (type === 'video' || file.size > VERCEL_LIMIT) {
       // Büyük dosyalar için direkt Cloudinary upload URL'i döndür
       const folder = type === 'video' ? 'gallery/videos' : 'gallery/images'
       const timestamp = Math.round(new Date().getTime() / 1000)
