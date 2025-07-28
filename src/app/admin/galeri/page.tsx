@@ -63,87 +63,52 @@ export default function AdminGaleriPage() {
       return
     }
 
-    // Önce signature al
-    const getSignature = async () => {
-      const timestamp = Math.round(new Date().getTime() / 1000)
-      const params = {
-        timestamp,
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: 'df770zzfr',
+        uploadPreset: 'video_upload',
         folder: 'gallery/videos',
-        resource_type: 'video',
-        allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+        resourceType: 'video',
+        maxFileSize: 500000000, // 500MB
+        allowedFormats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
         eager: [
           { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-        ]
-      }
-
-      const response = await fetch('/api/media/signature', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      })
-
-      if (!response.ok) {
-        throw new Error('Signature oluşturulamadı')
-      }
-
-      return await response.json()
-    }
-
-    // Widget'ı aç
-    getSignature().then(signatureData => {
-      const widget = window.cloudinary.createUploadWidget(
-        {
-          cloudName: 'df770zzfr',
-          uploadSignature: signatureData.signature,
-          apiKey: signatureData.api_key,
-          folder: 'gallery/videos',
-          resourceType: 'video',
-          maxFileSize: 500000000, // 500MB
-          allowedFormats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
-          eager: [
-            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-          ],
-          showAdvancedOptions: false,
-          cropping: false,
-          multiple: false,
-          defaultSource: 'local',
-          styles: {
-            palette: {
-              window: "#FFFFFF",
-              windowBorder: "#90A0B3",
-              tabIcon: "#0078FF",
-              menuIcons: "#5A616A",
-              textDark: "#000000",
-              textLight: "#FFFFFF",
-              link: "#0078FF",
-              action: "#FF620C",
-              inactiveTabIcon: "#0E2F5A",
-              error: "#F44235",
-              inProgress: "#0078FF",
-              complete: "#20B832",
-              sourceBg: "#E4EBF1"
-            }
-          }
-        },
-        (error: any, result: any) => {
-          if (!error && result && result.event === 'success') {
-            console.log('Video uploaded successfully:', result.info.secure_url)
-            setFormData({ ...formData, url: result.info.secure_url })
-            alert('Video başarıyla yüklendi! Şimdi başlık ve diğer bilgileri girebilirsiniz.')
-          } else if (error) {
-            console.error('Upload error:', error)
-            alert('Video yükleme hatası: ' + (error.message || 'Bilinmeyen hata'))
+        ],
+        showAdvancedOptions: false,
+        cropping: false,
+        multiple: false,
+        defaultSource: 'local',
+        styles: {
+          palette: {
+            window: "#FFFFFF",
+            windowBorder: "#90A0B3",
+            tabIcon: "#0078FF",
+            menuIcons: "#5A616A",
+            textDark: "#000000",
+            textLight: "#FFFFFF",
+            link: "#0078FF",
+            action: "#FF620C",
+            inactiveTabIcon: "#0E2F5A",
+            error: "#F44235",
+            inProgress: "#0078FF",
+            complete: "#20B832",
+            sourceBg: "#E4EBF1"
           }
         }
-      )
+      },
+      (error: any, result: any) => {
+        if (!error && result && result.event === 'success') {
+          console.log('Video uploaded successfully:', result.info.secure_url)
+          setFormData({ ...formData, url: result.info.secure_url })
+          alert('Video başarıyla yüklendi! Şimdi başlık ve diğer bilgileri girebilirsiniz.')
+        } else if (error) {
+          console.error('Upload error:', error)
+          alert('Video yükleme hatası: ' + (error.message || 'Bilinmeyen hata'))
+        }
+      }
+    )
 
-      widget.open()
-    }).catch(error => {
-      console.error('Signature error:', error)
-      alert('Video yükleme başlatılamadı: ' + error.message)
-    })
+    widget.open()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
