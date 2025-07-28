@@ -121,59 +121,65 @@ export default function AdminGaleriPage() {
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
-          // Video dosyaları için direkt Cloudinary upload
+          // Video dosyaları için direkt Cloudinary upload (Vercel API'si kullanmadan)
+          console.log('Video uploading directly to Cloudinary...')
+          
+          // Önce signature al
+          const timestamp = Math.round(new Date().getTime() / 1000)
+          const params = {
+            timestamp,
+            folder: 'gallery/videos',
+            resource_type: 'video',
+            allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+            eager: [
+              { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+            ]
+          }
+          
+          const signatureResponse = await fetch('/api/media/signature', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params),
+          })
+          
+          if (!signatureResponse.ok) {
+            throw new Error('Signature oluşturulamadı')
+          }
+          
+          const signatureData = await signatureResponse.json()
+          
+          // Direkt Cloudinary'ye upload
           const uploadFormData = new FormData()
           uploadFormData.append('file', selectedFile)
-          uploadFormData.append('type', 'video')
-
-          const uploadResponse = await fetch('/api/media/upload', {
+          uploadFormData.append('timestamp', timestamp.toString())
+          uploadFormData.append('signature', signatureData.signature)
+          uploadFormData.append('api_key', signatureData.api_key)
+          uploadFormData.append('folder', 'gallery/videos')
+          uploadFormData.append('resource_type', 'video')
+          uploadFormData.append('allowed_formats', 'mp4,mov,avi,wmv,flv,webm')
+          uploadFormData.append('eager', JSON.stringify([
+            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+          ]))
+          
+          console.log('Starting direct Cloudinary upload...')
+          
+          const directResponse = await fetch('https://api.cloudinary.com/v1_1/df770zzfr/video/upload', {
             method: 'POST',
             body: uploadFormData,
           })
-
-          if (!uploadResponse.ok) {
-            let errorMessage = 'Video yükleme hatası'
-            const responseText = await uploadResponse.text()
-            console.error('Video upload response:', responseText)
-            
-            try {
-              const error = JSON.parse(responseText)
-              errorMessage = error.error || errorMessage
-            } catch (e) {
-              errorMessage = responseText || errorMessage
-            }
-            
-            throw new Error(errorMessage)
-          }
-
-          const uploadResult = await uploadResponse.json()
           
-          // Eğer direkt upload gerekiyorsa
-          if (uploadResult.isDirectUpload) {
-            const directFormData = new FormData()
-            directFormData.append('file', selectedFile)
-            directFormData.append('timestamp', uploadResult.uploadParams.timestamp)
-            directFormData.append('signature', uploadResult.uploadParams.signature)
-            directFormData.append('api_key', 'df770zzfr')
-            directFormData.append('folder', uploadResult.uploadParams.folder)
-            directFormData.append('resource_type', uploadResult.uploadParams.resource_type)
-            directFormData.append('allowed_formats', uploadResult.uploadParams.allowed_formats.join(','))
-            
-            const directResponse = await fetch(uploadResult.uploadUrl, {
-              method: 'POST',
-              body: directFormData,
-            })
-            
-            if (!directResponse.ok) {
-              const directErrorText = await directResponse.text()
-              throw new Error(`Direkt upload hatası: ${directResponse.status} - ${directErrorText}`)
-            }
-            
-            const directResult = await directResponse.json()
-            mediaUrl = directResult.secure_url
-          } else {
-            mediaUrl = uploadResult.url
+          if (!directResponse.ok) {
+            const errorText = await directResponse.text()
+            console.error('Direct upload error:', errorText)
+            throw new Error(`Video upload başarısız: ${directResponse.status} - ${errorText}`)
           }
+          
+          const directResult = await directResponse.json()
+          mediaUrl = directResult.secure_url
+          console.log('Video uploaded successfully:', mediaUrl)
+          
         } else {
           // Resim dosyaları için normal upload
           const uploadFormData = new FormData()
