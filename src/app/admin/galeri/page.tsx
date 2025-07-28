@@ -91,20 +91,32 @@ export default function AdminGaleriPage() {
           
           // Upload parametrelerini ekle
           Object.keys(uploadResult.uploadParams).forEach(key => {
-            directFormData.append(key, uploadResult.uploadParams[key])
+            const value = uploadResult.uploadParams[key]
+            if (Array.isArray(value)) {
+              directFormData.append(key, JSON.stringify(value))
+            } else {
+              directFormData.append(key, value.toString())
+            }
           })
 
-          const directResponse = await fetch(uploadResult.uploadUrl, {
-            method: 'POST',
-            body: directFormData,
-          })
+          try {
+            const directResponse = await fetch(uploadResult.uploadUrl, {
+              method: 'POST',
+              body: directFormData,
+            })
 
-          if (!directResponse.ok) {
-            throw new Error('Direkt upload başarısız oldu')
+            if (!directResponse.ok) {
+              const errorText = await directResponse.text()
+              console.error('Direct upload error:', errorText)
+              throw new Error(`Direkt upload başarısız: ${directResponse.status}`)
+            }
+
+            const directResult = await directResponse.json()
+            mediaUrl = directResult.secure_url
+          } catch (directError) {
+            console.error('Direct upload catch error:', directError)
+            throw new Error(`Direkt upload hatası: ${directError instanceof Error ? directError.message : 'Bilinmeyen hata'}`)
           }
-
-          const directResult = await directResponse.json()
-          mediaUrl = directResult.secure_url
         } else {
           // Küçük dosyalar için normal upload
           mediaUrl = uploadResult.url

@@ -28,28 +28,26 @@ export async function POST(request: Request) {
       // Büyük dosyalar için direkt Cloudinary upload URL'i döndür
       const folder = type === 'video' ? 'gallery/videos' : 'gallery/images'
       const timestamp = Math.round(new Date().getTime() / 1000)
+      
+      const params = {
+        timestamp,
+        folder,
+        resource_type: type === 'video' ? 'video' : 'image',
+        allowed_formats: type === 'video' 
+          ? ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'] 
+          : ['jpg', 'jpeg', 'png', 'gif', 'webp']
+      }
+      
       const signature = cloudinary.utils.api_sign_request(
-        {
-          timestamp,
-          folder,
-          resource_type: type === 'video' ? 'video' : 'image',
-          allowed_formats: type === 'video' 
-            ? ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'] 
-            : ['jpg', 'jpeg', 'png', 'gif', 'webp']
-        },
+        params,
         process.env.CLOUDINARY_API_SECRET!
       )
 
       return NextResponse.json({
         uploadUrl: `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/${type === 'video' ? 'video' : 'image'}/upload`,
         uploadParams: {
-          timestamp,
-          signature,
-          folder,
-          resource_type: type === 'video' ? 'video' : 'image',
-          allowed_formats: type === 'video' 
-            ? ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'] 
-            : ['jpg', 'jpeg', 'png', 'gif', 'webp']
+          ...params,
+          signature
         },
         isDirectUpload: true
       })
