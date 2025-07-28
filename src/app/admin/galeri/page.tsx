@@ -66,7 +66,7 @@ export default function AdminGaleriPage() {
     const widget = window.cloudinary.createUploadWidget(
       {
         cloudName: 'df770zzfr',
-        uploadPreset: 'video_upload',
+        uploadPreset: 'ml_default',
         folder: 'gallery/videos',
         resourceType: 'video',
         maxFileSize: 500000000, // 500MB
@@ -121,10 +121,59 @@ export default function AdminGaleriPage() {
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
-          // Video dosyaları için Cloudinary widget kullan
-          openCloudinaryWidget()
-          setUploading(false)
-          return
+          // Video dosyaları için direkt Cloudinary upload
+          const uploadFormData = new FormData()
+          uploadFormData.append('file', selectedFile)
+          uploadFormData.append('type', 'video')
+
+          const uploadResponse = await fetch('/api/media/upload', {
+            method: 'POST',
+            body: uploadFormData,
+          })
+
+          if (!uploadResponse.ok) {
+            let errorMessage = 'Video yükleme hatası'
+            const responseText = await uploadResponse.text()
+            console.error('Video upload response:', responseText)
+            
+            try {
+              const error = JSON.parse(responseText)
+              errorMessage = error.error || errorMessage
+            } catch (e) {
+              errorMessage = responseText || errorMessage
+            }
+            
+            throw new Error(errorMessage)
+          }
+
+          const uploadResult = await uploadResponse.json()
+          
+          // Eğer direkt upload gerekiyorsa
+          if (uploadResult.isDirectUpload) {
+            const directFormData = new FormData()
+            directFormData.append('file', selectedFile)
+            directFormData.append('timestamp', uploadResult.uploadParams.timestamp)
+            directFormData.append('signature', uploadResult.uploadParams.signature)
+            directFormData.append('api_key', 'df770zzfr')
+            directFormData.append('folder', uploadResult.uploadParams.folder)
+            directFormData.append('resource_type', uploadResult.uploadParams.resource_type)
+            directFormData.append('allowed_formats', uploadResult.uploadParams.allowed_formats.join(','))
+            
+            const directResponse = await fetch(uploadResult.uploadUrl, {
+              method: 'POST',
+              body: directFormData,
+            })
+            
+            if (!directResponse.ok) {
+              const directErrorText = await directResponse.text()
+              throw new Error(`Direkt upload hatası: ${directResponse.status} - ${directErrorText}`)
+            }
+            
+            const directResult = await directResponse.json()
+            mediaUrl = directResult.secure_url
+          } else {
+            mediaUrl = uploadResult.url
+          }
         } else {
           // Resim dosyaları için normal upload
           const uploadFormData = new FormData()
@@ -275,21 +324,28 @@ export default function AdminGaleriPage() {
             {formData.type === 'VIDEO' ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Video Yükle
+                  Video Dosyası Seç
                 </label>
-                <button
-                  type="button"
-                  onClick={openCloudinaryWidget}
-                  className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
-                >
-                  Video Seçmek İçin Tıklayın
-                </button>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setSelectedFile(file)
+                      setFormData({ ...formData, url: '' }) // URL'yi temizle
+                    } else {
+                      setSelectedFile(null)
+                    }
+                  }}
+                  accept="video/*"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 <div className="text-sm text-gray-500 mt-1">
                   Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Maks. 500MB)
                 </div>
-                {formData.url && (
-                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
-                    <p className="text-sm text-green-700">✅ Video yüklendi: {formData.url.substring(0, 50)}...</p>
+                {selectedFile && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                    <p className="text-sm text-blue-700">📁 Seçilen dosya: {selectedFile.name} ({(selectedFile.size / (1024 * 1024)).toFixed(2)}MB)</p>
                   </div>
                 )}
               </div>
