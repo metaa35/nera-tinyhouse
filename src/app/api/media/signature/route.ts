@@ -22,6 +22,9 @@ export async function POST(request: Request) {
       process.env.CLOUDINARY_API_SECRET!
     )
 
+    console.log('Signature created for params:', uploadParams)
+    console.log('Signature:', signature)
+
     return NextResponse.json({
       signature,
       api_key: process.env.CLOUDINARY_API_KEY,

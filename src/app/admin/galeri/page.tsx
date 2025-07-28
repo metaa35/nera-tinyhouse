@@ -56,66 +56,67 @@ export default function AdminGaleriPage() {
 
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
-        // Video dosyaları için özel upload
         if (formData.type === 'VIDEO') {
-          const uploadFormData = new FormData()
-          uploadFormData.append('file', selectedFile)
-          uploadFormData.append('type', 'video')
-
-          const uploadResponse = await fetch('/api/media/upload', {
+          // Video dosyaları için direkt Cloudinary upload
+          const folder = 'gallery/videos'
+          const timestamp = Math.round(new Date().getTime() / 1000)
+          
+          const params = {
+            timestamp,
+            folder,
+            resource_type: 'video',
+            allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+            chunk_size: 6000000, // 6MB chunks
+            eager: [
+              { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+            ]
+          }
+          
+          // Cloudinary signature oluştur
+          const signatureResponse = await fetch('/api/media/signature', {
             method: 'POST',
-            body: uploadFormData,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params),
+          })
+          
+          if (!signatureResponse.ok) {
+            throw new Error('Signature oluşturulamadı')
+          }
+          
+          const signatureData = await signatureResponse.json()
+          
+          // Direkt Cloudinary'ye yükle
+          const directFormData = new FormData()
+          directFormData.append('file', selectedFile)
+          directFormData.append('timestamp', timestamp.toString())
+          directFormData.append('signature', signatureData.signature)
+          directFormData.append('api_key', signatureData.api_key)
+          directFormData.append('folder', folder)
+          directFormData.append('resource_type', 'video')
+          directFormData.append('chunk_size', '6000000')
+          directFormData.append('eager', JSON.stringify([
+            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+          ]))
+
+          console.log('Video uploading to Cloudinary...')
+          
+          const directResponse = await fetch(signatureData.uploadUrl, {
+            method: 'POST',
+            body: directFormData,
           })
 
-          if (!uploadResponse.ok) {
-            let errorMessage = 'Video yükleme hatası'
-            const responseText = await uploadResponse.text()
-            console.error('Video upload response:', responseText)
-            
-            try {
-              const error = JSON.parse(responseText)
-              errorMessage = error.error || errorMessage
-            } catch (e) {
-              errorMessage = responseText || errorMessage
-            }
-            
-            throw new Error(errorMessage)
+          if (!directResponse.ok) {
+            const errorText = await directResponse.text()
+            console.error('Video upload error:', errorText)
+            throw new Error(`Video upload başarısız: ${directResponse.status} - ${errorText}`)
           }
 
-          const uploadResult = await uploadResponse.json()
+          const directResult = await directResponse.json()
+          mediaUrl = directResult.secure_url
+          console.log('Video uploaded successfully:', mediaUrl)
           
-          if (uploadResult.isDirectUpload) {
-            // Büyük video dosyaları için direkt Cloudinary upload
-            const directFormData = new FormData()
-            directFormData.append('file', selectedFile)
-            
-            // Upload parametrelerini ekle
-            Object.keys(uploadResult.uploadParams).forEach(key => {
-              const value = uploadResult.uploadParams[key]
-              if (Array.isArray(value)) {
-                directFormData.append(key, JSON.stringify(value))
-              } else {
-                directFormData.append(key, value.toString())
-              }
-            })
-
-            const directResponse = await fetch(uploadResult.uploadUrl, {
-              method: 'POST',
-              body: directFormData,
-            })
-
-            if (!directResponse.ok) {
-              const errorText = await directResponse.text()
-              console.error('Direct upload error:', errorText)
-              throw new Error(`Video upload başarısız: ${directResponse.status}`)
-            }
-
-            const directResult = await directResponse.json()
-            mediaUrl = directResult.secure_url
-          } else {
-            // Küçük video dosyaları için normal upload
-            mediaUrl = uploadResult.url
-          }
         } else {
           // Resim dosyaları için normal upload
           const uploadFormData = new FormData()
@@ -136,7 +137,6 @@ export default function AdminGaleriPage() {
               const error = JSON.parse(responseText)
               errorMessage = error.error || errorMessage
             } catch (e) {
-              // JSON parse edilemezse text olarak kullan
               errorMessage = responseText || errorMessage
             }
             
@@ -168,6 +168,7 @@ export default function AdminGaleriPage() {
         setShowUploadForm(false)
         setUploadProgress(0)
         fetchMedia()
+        alert('Medya başarıyla yüklendi!')
       } else {
         const error = await response.json()
         alert(error.error || 'Bir hata oluştu')
