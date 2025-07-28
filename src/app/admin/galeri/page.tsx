@@ -87,34 +87,34 @@ export default function AdminGaleriPage() {
           
           const signatureData = await signatureResponse.json()
           
-          // Direkt Cloudinary'ye yükle
-          const directFormData = new FormData()
-          directFormData.append('file', selectedFile)
-          directFormData.append('timestamp', timestamp.toString())
-          directFormData.append('signature', signatureData.signature)
-          directFormData.append('api_key', signatureData.api_key)
-          directFormData.append('folder', folder)
-          directFormData.append('resource_type', 'video')
-          directFormData.append('chunk_size', '6000000')
-          directFormData.append('eager', JSON.stringify([
+          // Proxy üzerinden Cloudinary'ye yükle
+          const proxyFormData = new FormData()
+          proxyFormData.append('file', selectedFile)
+          proxyFormData.append('timestamp', timestamp.toString())
+          proxyFormData.append('signature', signatureData.signature)
+          proxyFormData.append('api_key', signatureData.api_key)
+          proxyFormData.append('folder', folder)
+          proxyFormData.append('resource_type', 'video')
+          proxyFormData.append('chunk_size', '6000000')
+          proxyFormData.append('eager', JSON.stringify([
             { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
           ]))
 
-          console.log('Video uploading to Cloudinary...')
+          console.log('Video uploading to Cloudinary via proxy...')
           
-          const directResponse = await fetch(signatureData.uploadUrl, {
+          const proxyResponse = await fetch('/api/media/upload-video', {
             method: 'POST',
-            body: directFormData,
+            body: proxyFormData,
           })
 
-          if (!directResponse.ok) {
-            const errorText = await directResponse.text()
+          if (!proxyResponse.ok) {
+            const errorText = await proxyResponse.text()
             console.error('Video upload error:', errorText)
-            throw new Error(`Video upload başarısız: ${directResponse.status} - ${errorText}`)
+            throw new Error(`Video upload başarısız: ${proxyResponse.status} - ${errorText}`)
           }
 
-          const directResult = await directResponse.json()
-          mediaUrl = directResult.secure_url
+          const proxyResult = await proxyResponse.json()
+          mediaUrl = proxyResult.secure_url
           console.log('Video uploaded successfully:', mediaUrl)
           
         } else {
