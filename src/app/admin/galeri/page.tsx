@@ -63,7 +63,31 @@ export default function AdminGaleriPage() {
     const widget = window.cloudinary.createUploadWidget(
       {
         cloudName: 'df770zzfr',
-        uploadPreset: 'ml_default',
+        apiKey: '255557867429555',
+        uploadSignature: async () => {
+          const response = await fetch('/api/media/signature', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              timestamp: Math.round(new Date().getTime() / 1000),
+              folder: 'gallery/videos',
+              resource_type: 'video',
+              allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+              eager: [
+                { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+              ]
+            }),
+          })
+          
+          if (!response.ok) {
+            throw new Error('Signature oluşturulamadı')
+          }
+          
+          const data = await response.json()
+          return data.signature
+        },
         folder: 'gallery/videos',
         resourceType: 'video',
         maxFileSize: 500000000, // 500MB
