@@ -228,8 +228,10 @@ export default function ContactPage() {
       {/* Map Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="aspect-video relative rounded-2xl overflow-hidden">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3829.5695802740192!2d26.9558917895388!3d38.734218983510345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ba323ded331dbb%3A0xdda1d20d8dfb1afb!2zQm96a8O2eSwgQWRhbMSxIFNrLiBObzo5LCAzNTgwMCBBbGlhxJ9hL8Swem1pcg!5e1!3m2!1str!2str!4v1753736562511!5m2!1str!2str" width="800" height="600" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+          <div className="flex justify-center">
+            <div className="w-full max-w-4xl rounded-2xl overflow-hidden">
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3829.5695802740192!2d26.9558917895388!3d38.734218983510345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ba323ded331dbb%3A0xdda1d20d8dfb1afb!2zQm96a8O2eSwgQWRhbMSxIFNrLiBObzo5LCAzNTgwMCBBbGlhxJ9hL8Swem1pcg!5e1!3m2!1str!2str!4v1753736562511!5m2!1str!2str" width="800" height="600" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+            </div>
           </div>
         </div>
       </section>
