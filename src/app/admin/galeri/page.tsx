@@ -73,6 +73,8 @@ export default function AdminGaleriPage() {
 
         const uploadResult = await uploadResponse.json()
         mediaUrl = uploadResult.url
+      } else if (!formData.url) {
+        throw new Error('Dosya seçin veya URL girin')
       }
 
       // Medya kaydını oluştur
