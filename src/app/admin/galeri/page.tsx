@@ -11,11 +11,7 @@ interface Media {
   createdAt: string
 }
 
-declare global {
-  interface Window {
-    cloudinary: any
-  }
-}
+
 
 export default function AdminGaleriPage() {
   const [media, setMedia] = useState<Media[]>([])
@@ -33,11 +29,6 @@ export default function AdminGaleriPage() {
 
   useEffect(() => {
     fetchMedia()
-    // Cloudinary widget script'ini yükle
-    const script = document.createElement('script')
-    script.src = 'https://upload-widget.cloudinary.com/global/all.js'
-    script.async = true
-    document.head.appendChild(script)
   }, [])
 
   const fetchMedia = async () => {
@@ -54,66 +45,12 @@ export default function AdminGaleriPage() {
     }
   }
 
-  const openCloudinaryWidget = () => {
-    if (!window.cloudinary) {
-      alert('Cloudinary widget yüklenemedi')
-      return
-    }
 
-    const widget = window.cloudinary.createUploadWidget(
-      {
-        cloudName: 'df770zzfr',
-        apiKey: '255557867429555',
-        uploadSignature: async () => {
-          const response = await fetch('/api/media/signature', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              timestamp: Math.round(new Date().getTime() / 1000),
-              folder: 'gallery/videos',
-              resource_type: 'video',
-              allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
-              eager: [
-                { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-              ]
-            }),
-          })
-          
-          if (!response.ok) {
-            throw new Error('Signature oluşturulamadı')
-          }
-          
-          const data = await response.json()
-          return data.signature
-        },
-        folder: 'gallery/videos',
-        resourceType: 'video',
-        maxFileSize: 500000000, // 500MB
-        allowedFormats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
-        eager: [
-          { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-        ]
-      },
-      (error: any, result: any) => {
-        if (!error && result && result.event === 'success') {
-          console.log('Video uploaded successfully:', result.info.secure_url)
-          setFormData({ ...formData, url: result.info.secure_url })
-          alert('Video başarıyla yüklendi!')
-        } else if (error) {
-          console.error('Upload error:', error)
-          alert('Video yükleme hatası: ' + error.message)
-        }
-      }
-    )
-
-    widget.open()
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setUploading(true)
+    setUploadProgress(0)
 
     try {
       let mediaUrl = formData.url
@@ -121,10 +58,107 @@ export default function AdminGaleriPage() {
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
-          // Video dosyaları için Cloudinary widget kullan
-          openCloudinaryWidget()
-          setUploading(false)
-          return
+          // Video dosyaları için progress bar ile upload
+          console.log('Video uploading with progress...')
+          
+          const folder = 'gallery/videos'
+          const timestamp = Math.round(new Date().getTime() / 1000)
+          
+          const params = {
+            timestamp,
+            folder,
+            resource_type: 'video',
+            allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
+            eager: [
+              { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+            ]
+          }
+          
+          // Cloudinary signature oluştur
+          const signatureResponse = await fetch('/api/media/signature', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params),
+          })
+          
+          if (!signatureResponse.ok) {
+            throw new Error('Signature oluşturulamadı')
+          }
+          
+          const signatureData = await signatureResponse.json()
+          
+          // Progress bar ile upload
+          const xhr = new XMLHttpRequest()
+          
+          return new Promise((resolve, reject) => {
+            xhr.upload.addEventListener('progress', (e) => {
+              if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100
+                setUploadProgress(percentComplete)
+                console.log(`Upload progress: ${percentComplete.toFixed(2)}%`)
+              }
+            })
+            
+            xhr.addEventListener('load', () => {
+              if (xhr.status === 200) {
+                try {
+                  const result = JSON.parse(xhr.responseText)
+                  mediaUrl = result.secure_url
+                  console.log('Video uploaded successfully:', mediaUrl)
+                  resolve(mediaUrl)
+                } catch (error) {
+                  reject(new Error('Upload response parse hatası'))
+                }
+              } else {
+                reject(new Error(`Upload failed: ${xhr.status}`))
+              }
+            })
+            
+            xhr.addEventListener('error', () => {
+              reject(new Error('Upload network hatası'))
+            })
+            
+            const formData = new FormData()
+            formData.append('file', selectedFile)
+            formData.append('timestamp', timestamp.toString())
+            formData.append('signature', signatureData.signature)
+            formData.append('api_key', signatureData.api_key)
+            formData.append('folder', folder)
+            formData.append('resource_type', 'video')
+            formData.append('eager', JSON.stringify([
+              { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+            ]))
+            
+            xhr.open('POST', signatureData.uploadUrl)
+            xhr.send(formData)
+          }).then(async (uploadedUrl) => {
+            // Medya kaydını oluştur
+            const response = await fetch('/api/media', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                ...formData,
+                url: uploadedUrl
+              }),
+            })
+
+            if (response.ok) {
+              setFormData({ title: '', url: '', alt: '', type: 'IMAGE' })
+              setSelectedFile(null)
+              setShowUploadForm(false)
+              setUploadProgress(0)
+              fetchMedia()
+              alert('Video başarıyla yüklendi!')
+            } else {
+              const error = await response.json()
+              alert(error.error || 'Bir hata oluştu')
+            }
+          })
+          
         } else {
           // Resim dosyaları için normal upload
           const uploadFormData = new FormData()
@@ -158,28 +192,30 @@ export default function AdminGaleriPage() {
         throw new Error('Dosya seçin veya URL girin')
       }
 
-      // Medya kaydını oluştur
-      const response = await fetch('/api/media', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          url: mediaUrl
-        }),
-      })
+      // Resim dosyaları için medya kaydını oluştur
+      if (formData.type === 'IMAGE') {
+        const response = await fetch('/api/media', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...formData,
+            url: mediaUrl
+          }),
+        })
 
-      if (response.ok) {
-        setFormData({ title: '', url: '', alt: '', type: 'IMAGE' })
-        setSelectedFile(null)
-        setShowUploadForm(false)
-        setUploadProgress(0)
-        fetchMedia()
-        alert('Medya başarıyla yüklendi!')
-      } else {
-        const error = await response.json()
-        alert(error.error || 'Bir hata oluştu')
+        if (response.ok) {
+          setFormData({ title: '', url: '', alt: '', type: 'IMAGE' })
+          setSelectedFile(null)
+          setShowUploadForm(false)
+          setUploadProgress(0)
+          fetchMedia()
+          alert('Medya başarıyla yüklendi!')
+        } else {
+          const error = await response.json()
+          alert(error.error || 'Bir hata oluştu')
+        }
       }
     } catch (error) {
       console.error('Yükleme hatası:', error)
@@ -275,18 +311,39 @@ export default function AdminGaleriPage() {
             {formData.type === 'VIDEO' ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Video Yükle
+                  Video Dosyası Seç
                 </label>
-                <button
-                  type="button"
-                  onClick={openCloudinaryWidget}
-                  className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
-                >
-                  Video Seçmek İçin Tıklayın
-                </button>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setSelectedFile(file)
+                      setFormData({ ...formData, url: '' }) // URL'yi temizle
+                    } else {
+                      setSelectedFile(null)
+                    }
+                  }}
+                  accept="video/*"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 <div className="text-sm text-gray-500 mt-1">
                   Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Maks. 500MB)
                 </div>
+                {uploading && uploadProgress > 0 && (
+                  <div className="mt-2">
+                    <div className="flex justify-between text-sm text-gray-600 mb-1">
+                      <span>Yükleniyor...</span>
+                      <span>{uploadProgress.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div>
