@@ -68,13 +68,17 @@ export default function AdminGaleriPage() {
 
         if (!uploadResponse.ok) {
           let errorMessage = 'Dosya yükleme hatası'
+          const responseText = await uploadResponse.text()
+          console.error('Upload response:', responseText)
+          
           try {
-            const error = await uploadResponse.json()
+            const error = JSON.parse(responseText)
             errorMessage = error.error || errorMessage
           } catch (e) {
-            const text = await uploadResponse.text()
-            console.error('Upload response:', text)
+            // JSON parse edilemezse text olarak kullan
+            errorMessage = responseText || errorMessage
           }
+          
           throw new Error(errorMessage)
         }
 
