@@ -66,7 +66,7 @@ export default function AdminGaleriPage() {
         uploadPreset: 'ml_default',
         folder: 'gallery/videos',
         resourceType: 'video',
-        maxFileSize: 100000000, // 100MB
+        maxFileSize: 500000000, // 500MB
         allowedFormats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
         eager: [
           { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
@@ -261,7 +261,7 @@ export default function AdminGaleriPage() {
                   Video Seçmek İçin Tıklayın
                 </button>
                 <div className="text-sm text-gray-500 mt-1">
-                  Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Maks. 100MB)
+                  Desteklenen formatlar: MP4, MOV, AVI, WMV, FLV, WebM (Maks. 500MB)
                 </div>
               </div>
             ) : (
