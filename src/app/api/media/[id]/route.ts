@@ -10,12 +10,13 @@ cloudinary.config({
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id } = await params
+    const idNum = parseInt(id)
 
-    if (isNaN(id)) {
+    if (isNaN(idNum)) {
       return NextResponse.json(
         { error: 'Geçersiz ID' },
         { status: 400 }
@@ -23,7 +24,7 @@ export async function DELETE(
     }
 
     const media = await prisma.media.findUnique({
-      where: { id }
+      where: { id: idNum }
     })
 
     if (!media) {
@@ -52,7 +53,7 @@ export async function DELETE(
     }
 
     await prisma.media.delete({
-      where: { id }
+      where: { id: idNum }
     })
 
     return NextResponse.json({ message: 'Medya dosyası başarıyla silindi' })
