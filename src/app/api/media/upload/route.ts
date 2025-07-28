@@ -24,11 +24,16 @@ export async function POST(request: Request) {
     // Dosya boyutu kontrolü (Vercel limiti: 4.5MB)
     const VERCEL_LIMIT = 4.5 * 1024 * 1024
     
-    // Video dosyaları için her zaman direkt upload kullan
+    // Video dosyaları için chunk upload kullan
     if (type === 'video') {
-      return NextResponse.json({
-        error: 'Video dosyaları için direkt Cloudinary upload kullanın'
-      }, { status: 400 })
+      const chunkSize = 4 * 1024 * 1024 // 4MB chunks
+      const chunks = Math.ceil(file.size / chunkSize)
+      
+      if (chunks > 1) {
+        return NextResponse.json({
+          error: 'Video dosyaları için chunk upload kullanın'
+        }, { status: 400 })
+      }
     }
     
     // Büyük dosyalar için direkt upload

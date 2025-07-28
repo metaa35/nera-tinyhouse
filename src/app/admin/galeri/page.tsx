@@ -53,103 +53,33 @@ export default function AdminGaleriPage() {
       // Eğer dosya seçilmişse Cloudinary'ye yükle
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
-          // Video dosyaları için chunk upload
-          const chunkSize = 4 * 1024 * 1024 // 4MB chunks
-          const chunks = Math.ceil(selectedFile.size / chunkSize)
+          // Video dosyaları için Cloudinary unsigned upload
+          console.log('Video uploading to Cloudinary via unsigned upload...')
           
-          console.log(`Video uploading in ${chunks} chunks...`)
-          
-          if (chunks > 1) {
-            // Büyük video dosyaları için chunk upload
-            const folder = 'gallery/videos'
-            const timestamp = Math.round(new Date().getTime() / 1000)
-            
-            const params = {
-              timestamp,
-              folder,
-              resource_type: 'video',
-              allowed_formats: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'webm'],
-              chunk_size: chunkSize,
-              eager: [
-                { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-              ]
-            }
-            
-            // Cloudinary signature oluştur
-            const signatureResponse = await fetch('/api/media/signature', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(params),
-            })
-            
-            if (!signatureResponse.ok) {
-              throw new Error('Signature oluşturulamadı')
-            }
-            
-            const signatureData = await signatureResponse.json()
-            
-            // Chunk upload için FormData
-            const chunkFormData = new FormData()
-            chunkFormData.append('file', selectedFile)
-            chunkFormData.append('timestamp', timestamp.toString())
-            chunkFormData.append('signature', signatureData.signature)
-            chunkFormData.append('api_key', signatureData.api_key)
-            chunkFormData.append('folder', folder)
-            chunkFormData.append('resource_type', 'video')
-            chunkFormData.append('chunk_size', chunkSize.toString())
-            chunkFormData.append('eager', JSON.stringify([
-              { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
-            ]))
+          // Cloudinary unsigned upload
+          const unsignedFormData = new FormData()
+          unsignedFormData.append('file', selectedFile)
+          unsignedFormData.append('upload_preset', 'ml_default') // Cloudinary preset
+          unsignedFormData.append('folder', 'gallery/videos')
+          unsignedFormData.append('resource_type', 'video')
+          unsignedFormData.append('eager', JSON.stringify([
+            { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
+          ]))
 
-            console.log('Video uploading to Cloudinary via chunk upload...')
-            
-            // Chunk upload
-            const chunkResponse = await fetch('/api/media/upload-chunk', {
-              method: 'POST',
-              body: chunkFormData,
-            })
+          const unsignedResponse = await fetch('https://api.cloudinary.com/v1_1/df770zzfr/video/upload', {
+            method: 'POST',
+            body: unsignedFormData,
+          })
 
-            if (!chunkResponse.ok) {
-              const errorText = await chunkResponse.text()
-              console.error('Chunk upload error:', errorText)
-              throw new Error(`Video upload başarısız: ${chunkResponse.status} - ${errorText}`)
-            }
-
-            const chunkResult = await chunkResponse.json()
-            mediaUrl = chunkResult.secure_url
-            console.log('Video uploaded successfully:', mediaUrl)
-            
-          } else {
-            // Küçük video dosyaları için normal upload
-            const uploadFormData = new FormData()
-            uploadFormData.append('file', selectedFile)
-            uploadFormData.append('type', 'video')
-
-            const uploadResponse = await fetch('/api/media/upload', {
-              method: 'POST',
-              body: uploadFormData,
-            })
-
-            if (!uploadResponse.ok) {
-              let errorMessage = 'Video yükleme hatası'
-              const responseText = await uploadResponse.text()
-              console.error('Video upload response:', responseText)
-              
-              try {
-                const error = JSON.parse(responseText)
-                errorMessage = error.error || errorMessage
-              } catch (e) {
-                errorMessage = responseText || errorMessage
-              }
-              
-              throw new Error(errorMessage)
-            }
-
-            const uploadResult = await uploadResponse.json()
-            mediaUrl = uploadResult.url
+          if (!unsignedResponse.ok) {
+            const errorText = await unsignedResponse.text()
+            console.error('Unsigned upload error:', errorText)
+            throw new Error(`Video upload başarısız: ${unsignedResponse.status} - ${errorText}`)
           }
+
+          const unsignedResult = await unsignedResponse.json()
+          mediaUrl = unsignedResult.secure_url
+          console.log('Video uploaded successfully:', mediaUrl)
           
         } else {
           // Resim dosyaları için normal upload
