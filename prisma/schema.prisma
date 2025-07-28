@@ -53,6 +53,16 @@ model Image {
   updatedAt DateTime @updatedAt
 }
 
+model Media {
+  id        Int      @id @default(autoincrement())
+  title     String
+  url       String
+  alt       String?
+  type      MediaType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -92,4 +102,9 @@ model Faq {
 enum Role {
   USER
   ADMIN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
 }

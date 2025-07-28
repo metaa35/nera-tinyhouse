@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { shuffleArray } from '@/utils/array';
+import RandomGalleryImages from '@/components/RandomGalleryImages';
 
 interface Project {
   id: number;
@@ -134,25 +135,8 @@ export default function Home() {
             </a>
           </div>
           {/* Sağ: Görseller */}
-          <div className="flex-1 flex gap-6">
-            <div className="w-1/2">
-              {randomImages.hakkimizda1 && (
-              <img
-                  src={randomImages.hakkimizda1}
-                alt="Tiny House"
-                className="rounded-3xl object-cover w-full h-80"
-              />
-              )}
-            </div>
-            <div className="w-1/2">
-              {randomImages.hakkimizda2 && (
-              <img
-                  src={randomImages.hakkimizda2}
-                alt="Tiny House"
-                className="rounded-3xl object-cover w-full h-80"
-              />
-              )}
-            </div>
+          <div className="flex-1">
+            <RandomGalleryImages count={2} className="grid-cols-2 gap-6" />
           </div>
         </div>
       </section>
@@ -167,13 +151,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center w-full gap-12">
             {/* Sol: Görsel */}
             <div className="flex-1 flex justify-center">
-              {randomImages.hizmetlerimiz && (
-              <img
-                  src={randomImages.hizmetlerimiz}
-                alt="Tiny House"
-                className="rounded-3xl object-cover w-full max-w-md h-96"
-              />
-              )}
+              <RandomGalleryImages count={1} className="max-w-md" />
             </div>
             {/* Sağ: Hizmetler */}
             <div className="flex-1 flex flex-col gap-8">
@@ -194,8 +172,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* İlham Veren Tiny House Projeleri */}
+      {/* Galeri Bölümü */}
       <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Galeri</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Projelerimizden seçilen görseller ve videolar ile tiny house yaşamının güzelliklerini keşfedin.
+            </p>
+          </div>
+          <RandomGalleryImages count={6} className="mb-8" />
+          <div className="text-center">
+            <Link
+              href="/galeri"
+              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition-colors"
+            >
+              Tüm Galeriyi Gör
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* İlham Veren Tiny House Projeleri */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">İlham Veren Tiny House Projeleri</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
