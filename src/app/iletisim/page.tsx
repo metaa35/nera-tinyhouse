@@ -170,9 +170,10 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="text-lg font-semibold mb-1 text-[#2D3436]">Telefon</h4>
-                      <p className="text-[#636E72]">
-                        +90 (532) 717 4087 - +90 (532) 729 6372
-                      </p>
+                      <div className="text-[#636E72] space-y-1">
+                        <div>+90 (532) 717 4087</div>
+                        <div>+90 (532) 729 6372</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -228,7 +229,7 @@ export default function ContactPage() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="aspect-video relative rounded-2xl overflow-hidden">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d3829.567080735649!2d26.9604358087369!3d38.73426560502259!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sBozk%C3%B6y%20Mah.%20Sanayi%20Cad.%20Yeni%20Fo%C3%A7a%20Yolu%20%C3%9Czeri%20No%3A9%20!5e1!3m2!1str!2str!4v1753736086376!5m2!1str!2str" width="600" height="450" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3829.5695802740192!2d26.9558917895388!3d38.734218983510345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14ba323ded331dbb%3A0xdda1d20d8dfb1afb!2zQm96a8O2eSwgQWRhbMSxIFNrLiBObzo5LCAzNTgwMCBBbGlhxJ9hL8Swem1pcg!5e1!3m2!1str!2str!4v1753736562511!5m2!1str!2str" width="800" height="600" style={{ border: 0 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
           </div>
         </div>
       </section>
