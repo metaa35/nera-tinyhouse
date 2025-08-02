@@ -10,8 +10,10 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS  // Hostinger e-posta şifresi
   },
   tls: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+    ciphers: 'SSLv3'
+  },
+  authMethod: 'PLAIN'
 })
 
 // Transporter'ı test et
