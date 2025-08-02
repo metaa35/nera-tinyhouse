@@ -2,6 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Video Player Slider Styles */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-track {
+  background: rgba(255, 255, 255, 0.3);
+  height: 4px;
+  border-radius: 2px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: white;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider::-moz-range-track {
+  background: rgba(255, 255, 255, 0.3);
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+}
+
+.slider::-moz-range-thumb {
+  background: white;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* YouTube Player Gizleme */
+.youtube-player-container iframe {
+  position: relative;
+}
+
+.youtube-player-container iframe::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: black;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* YouTube başlık ve kontrolleri gizle */
+.ytp-title,
+.ytp-show-cards-title,
+.ytp-watermark,
+.ytp-youtube-button,
+.ytp-branding-button,
+.ytp-pause-overlay,
+.ytp-cued-thumbnail-overlay {
+  display: none !important;
+}
+
+/* YouTube player içindeki tüm başlık elementlerini gizle */
+.youtube-player-container .ytp-title-text,
+.youtube-player-container .ytp-show-cards-title,
+.youtube-player-container .ytp-watermark {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
 :root {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 0, 0, 0;

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import SimpleVideoPlayer from '@/components/SimpleVideoPlayer'
+import YouTubeVideoPlayer from '@/components/YouTubeVideoPlayer'
+
 
 interface Media {
   id: number
@@ -9,6 +12,8 @@ interface Media {
   url: string
   alt?: string
   type: 'IMAGE' | 'VIDEO'
+  source?: string
+  thumbnail?: string
   createdAt: string
 }
 
@@ -158,22 +163,46 @@ export default function GaleriPage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {videos.map((video) => (
                     <div
                       key={video.id}
-                      className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                      className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
                     >
-                      <video
-                        src={video.url}
-                        className="w-full h-64 object-cover"
-                        controls
-                        poster={video.url.replace('.mp4', '.jpg')}
-                      />
-                      <div className="p-4 bg-white">
-                        <h3 className="font-semibold text-gray-800 text-sm">
+                      {/* Video Player */}
+                      <div className="relative aspect-video">
+                        {video.source === 'youtube' ? (
+                          <YouTubeVideoPlayer
+                            videoId={video.url}
+                            title={video.title}
+                            className="w-full h-full"
+                            thumbnail={video.thumbnail}
+                          />
+                        ) : (
+                          <SimpleVideoPlayer
+                            url={video.url}
+                            title={video.title}
+                            className="w-full h-full"
+                          />
+                        )}
+                      </div>
+                      
+                      {/* Video Info */}
+                      <div className="p-6">
+                        <h3 className="font-bold text-lg text-gray-800 mb-2 line-clamp-2">
                           {video.title}
                         </h3>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            Video
+                          </span>
+                          <span>
+                            {new Date(video.createdAt).toLocaleDateString('tr-TR')}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}

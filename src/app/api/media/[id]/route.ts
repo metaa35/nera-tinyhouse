@@ -8,6 +8,61 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const idNum = parseInt(id)
+    const body = await request.json()
+
+    if (isNaN(idNum)) {
+      return NextResponse.json(
+        { error: 'Geçersiz ID' },
+        { status: 400 }
+      )
+    }
+
+    const { title, alt, url } = body
+
+    if (!title) {
+      return NextResponse.json(
+        { error: 'Başlık gereklidir' },
+        { status: 400 }
+      )
+    }
+
+    const media = await prisma.media.findUnique({
+      where: { id: idNum }
+    })
+
+    if (!media) {
+      return NextResponse.json(
+        { error: 'Medya dosyası bulunamadı' },
+        { status: 404 }
+      )
+    }
+
+    const updatedMedia = await prisma.media.update({
+      where: { id: idNum },
+      data: {
+        title,
+        alt: alt || null,
+        url: url || media.url
+      }
+    })
+
+    return NextResponse.json(updatedMedia)
+  } catch (error) {
+    console.error('Media update error:', error)
+    return NextResponse.json(
+      { error: 'Medya dosyası güncellenirken hata oluştu' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
