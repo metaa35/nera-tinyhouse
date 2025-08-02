@@ -1,17 +1,14 @@
 import nodemailer from 'nodemailer'
 
-// Hostinger SMTP transporter'ı oluştur (Alternatif yapılandırma)
+// Hostinger SMTP transporter'ı oluştur (Uygulama şifresi ile)
 const transporter = nodemailer.createTransport({
-  service: 'hostinger', // Hostinger servis adı
   host: 'smtp.hostinger.com',
   port: 465,
   secure: true,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  debug: true, // Debug modunu etkinleştir
-  logger: true // Logger'ı etkinleştir
+    user: 'info@nerayapi.com', // Sizin e-posta adresiniz
+    pass: process.env.EMAIL_PASS  // Uygulama şifresi
+  }
 })
 
 // Transporter'ı test et
@@ -33,12 +30,12 @@ export async function sendContactEmail(contactData: {
   const { name, email, phone, message } = contactData
 
   console.log('E-posta gönderme başlıyor...')
-  console.log('Gönderen:', process.env.EMAIL_USER)
-  console.log('Alıcı:', process.env.EMAIL_USER)
+  console.log('Gönderen: info@nerayapi.com')
+  console.log('Alıcı: info@nerayapi.com')
 
   const mailOptions = {
-    from: process.env.EMAIL_USER, // Basit from adresi
-    to: process.env.EMAIL_USER, // Kendi e-posta adresinize gönderilecek
+    from: 'info@nerayapi.com', // Sizin e-posta adresiniz
+    to: 'info@nerayapi.com', // Kendi e-posta adresinize gönderilecek
     subject: `Yeni İletişim Formu Mesajı - ${name}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -88,7 +85,7 @@ export async function sendAutoReply(toEmail: string, name: string) {
   console.log('Alıcı:', toEmail)
 
   const mailOptions = {
-    from: process.env.EMAIL_USER, // Basit from adresi
+    from: 'info@nerayapi.com', // Sizin e-posta adresiniz
     to: toEmail,
     subject: 'Mesajınız Alındı - Nera Yapı',
     html: `
