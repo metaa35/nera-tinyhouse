@@ -24,6 +24,7 @@ export default function ContactPage() {
     setLoading(true)
     setSuccess('')
     setError('')
+    
     try {
       const res = await fetch('/api/iletisim', {
         method: 'POST',
@@ -35,11 +36,14 @@ export default function ContactPage() {
           message: form.message
         })
       })
+      
       if (!res.ok) throw new Error('Mesaj gönderilemedi')
-      setSuccess('Mesajınız başarıyla gönderildi!')
+      
+      const result = await res.json()
+      setSuccess('Mesajınız başarıyla gönderildi! En kısa sürede size geri dönüş yapacağız.')
       setForm({ name: '', email: '', phone: '', subject: '', message: '' })
     } catch (err) {
-      setError('Mesaj gönderilirken bir hata oluştu.')
+      setError('Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setLoading(false)
     }
@@ -70,27 +74,46 @@ export default function ContactPage() {
               <h2 className="text-3xl font-bold mb-8 text-[#2D3436]">
                 Bize Ulaşın
               </h2>
-              <form className="space-y-6">
+              
+              {success && (
+                <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                  {success}
+                </div>
+              )}
+              
+              {error && (
+                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                  {error}
+                </div>
+              )}
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-[#636E72] mb-2">
-                    Ad Soyad
+                    Ad Soyad *
                   </label>
                   <input
                     type="text"
                     id="name"
                     name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 border border-[#FF6B6B]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
                     placeholder="Adınız Soyadınız"
                   />
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-[#636E72] mb-2">
-                    E-posta
+                    E-posta *
                   </label>
                   <input
                     type="email"
                     id="email"
                     name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 border border-[#FF6B6B]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
                     placeholder="ornek@email.com"
                   />
@@ -103,17 +126,22 @@ export default function ContactPage() {
                     type="tel"
                     id="phone"
                     name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
                     className="w-full px-4 py-3 border border-[#FF6B6B]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
                     placeholder="05XX XXX XX XX"
                   />
                 </div>
                 <div>
                   <label htmlFor="message" className="block text-sm font-medium text-[#636E72] mb-2">
-                    Mesajınız
+                    Mesajınız *
                   </label>
                   <textarea
                     id="message"
                     name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    required
                     rows={4}
                     className="w-full px-4 py-3 border border-[#FF6B6B]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
                     placeholder="Mesajınızı buraya yazın..."
@@ -121,9 +149,10 @@ export default function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full px-8 py-4 bg-[#FF6B6B] text-white font-medium hover:bg-[#FF5252] transition-all duration-300"
+                  disabled={loading}
+                  className="w-full px-8 py-4 bg-[#FF6B6B] text-white font-medium hover:bg-[#FF5252] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Gönder
+                  {loading ? 'Gönderiliyor...' : 'Gönder'}
                 </button>
               </form>
             </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { sendContactEmail, sendAutoReply } from '@/utils/email'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -19,10 +20,12 @@ export async function GET() {
   }
 }
 
-// POST: Yeni mesaj ekle
+// POST: Yeni mesaj ekle ve e-posta gönder
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+    
+    // Veritabanına kaydet
     const newMessage = await prisma.contact.create({
       data: {
         name: body.name,
@@ -31,8 +34,25 @@ export async function POST(request: Request) {
         message: body.message,
       }
     })
-    return NextResponse.json(newMessage)
+
+    // Size e-posta gönder
+    const emailResult = await sendContactEmail({
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      message: body.message
+    })
+
+    // Gönderen kişiye otomatik yanıt gönder
+    const autoReplyResult = await sendAutoReply(body.email, body.name)
+
+    return NextResponse.json({
+      ...newMessage,
+      emailSent: emailResult.success,
+      autoReplySent: autoReplyResult.success
+    })
   } catch (error) {
+    console.error('İletişim formu hatası:', error)
     return NextResponse.json({ error: 'Mesaj eklenemedi' }, { status: 500 })
   }
 }
