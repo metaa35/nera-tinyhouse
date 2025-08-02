@@ -21,11 +21,15 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Form submit edildi!')
+    console.log('Form verileri:', form)
+    
     setLoading(true)
     setSuccess('')
     setError('')
     
     try {
+      console.log('API isteği gönderiliyor...')
       const res = await fetch('/api/iletisim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -37,12 +41,17 @@ export default function ContactPage() {
         })
       })
       
+      console.log('API yanıtı:', res.status, res.statusText)
+      
       if (!res.ok) throw new Error('Mesaj gönderilemedi')
       
       const result = await res.json()
+      console.log('API sonucu:', result)
+      
       setSuccess('Mesajınız başarıyla gönderildi! En kısa sürede size geri dönüş yapacağız.')
       setForm({ name: '', email: '', phone: '', subject: '', message: '' })
     } catch (err) {
+      console.error('Form hatası:', err)
       setError('Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setLoading(false)
