@@ -2,7 +2,12 @@ import { withAuth } from "next-auth/middleware"
 
 export default withAuth(
   function middleware(req) {
-    // Admin route'larına erişim kontrolü
+    // Login sayfasına erişime izin ver
+    if (req.nextUrl.pathname === "/admin/login") {
+      return
+    }
+    
+    // Diğer admin route'larına erişim kontrolü
     if (req.nextUrl.pathname.startsWith("/admin")) {
       // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
       if (!req.nextauth.token) {
@@ -12,7 +17,14 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token
+      authorized: ({ token, req }) => {
+        // Login sayfasına her zaman erişim ver
+        if (req.nextUrl.pathname === "/admin/login") {
+          return true
+        }
+        // Diğer admin sayfaları için token kontrolü
+        return !!token
+      }
     },
   }
 )
