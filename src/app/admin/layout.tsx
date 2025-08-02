@@ -19,10 +19,15 @@ export default function AdminLayout({
   useEffect(() => {
     if (status === 'loading') return; // Yükleme durumunda bekle
     
-    if (!session) {
+    if (!session && pathname !== '/admin/login') {
       router.push('/admin/login');
     }
-  }, [session, status, router]);
+  }, [session, status, router, pathname]);
+
+  // Login sayfasındaysa sadece children'ı göster
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   // Yükleme durumunda loading göster
   if (status === 'loading') {
@@ -36,9 +41,16 @@ export default function AdminLayout({
     );
   }
 
-  // Giriş yapmamışsa hiçbir şey gösterme
+  // Giriş yapmamışsa loading göster (yönlendirme sırasında)
   if (!session) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Yönlendiriliyor...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
