@@ -1,15 +1,25 @@
 'use client'
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { useState, useEffect } from 'react'
+import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+
+  // Zaten giriş yapmışsa admin paneline yönlendir
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (session) {
+      router.push('/admin')
+    }
+  }, [session, status, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,6 +40,23 @@ export default function LoginPage() {
     } catch (error) {
       setError('Bir hata oluştu. Lütfen tekrar deneyin.')
     }
+  }
+
+  // Yükleme durumunda loading göster
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Zaten giriş yapmışsa hiçbir şey gösterme
+  if (session) {
+    return null
   }
 
   return (

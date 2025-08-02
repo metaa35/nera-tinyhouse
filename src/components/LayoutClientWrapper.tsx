@@ -6,7 +6,7 @@ import { SessionProvider } from "next-auth/react";
 
 export default function LayoutClientWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = pathname?.startsWith("/admin") || false;
 
   return (
     <SessionProvider>

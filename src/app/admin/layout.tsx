@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { useEffect } from 'react'
 
 export default function AdminLayout({
   children,
@@ -10,7 +12,34 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session, status } = useSession();
   const isActive = (path: string) => pathname === path;
+
+  // Authentication kontrolü
+  useEffect(() => {
+    if (status === 'loading') return; // Yükleme durumunda bekle
+    
+    if (!session) {
+      router.push('/admin/login');
+    }
+  }, [session, status, router]);
+
+  // Yükleme durumunda loading göster
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Giriş yapmamışsa hiçbir şey gösterme
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -25,12 +54,17 @@ export default function AdminLayout({
               <Link href="/admin/ekibimiz" className={isActive('/admin/ekibimiz') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>Ekibimiz</Link>
               <Link href="/admin/faq" className={isActive('/admin/faq') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>SSS</Link>
             </div>
-            <button
-              onClick={() => router.push('/api/auth/signout')}
-              className="text-gray-500 hover:text-red-600 text-sm font-medium border px-4 py-1 rounded"
-            >
-              Çıkış Yap
-            </button>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">
+                Hoş geldin, {session.user?.name || session.user?.email}
+              </span>
+              <button
+                onClick={() => router.push('/api/auth/signout')}
+                className="text-gray-500 hover:text-red-600 text-sm font-medium border px-4 py-1 rounded"
+              >
+                Çıkış Yap
+              </button>
+            </div>
           </div>
         </div>
       </nav>

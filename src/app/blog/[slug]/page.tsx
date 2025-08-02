@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 export default function BlogDetailPage() {
   const params = useParams()
-  const { slug } = params
+  const slug = params?.slug as string
   const [blog, setBlog] = useState<any | null>(null)
   useEffect(() => {
     fetch('/api/blog')

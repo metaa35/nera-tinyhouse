@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 export default function EditBlog() {
   const router = useRouter()
   const params = useParams()
-  const { slug } = params
+  const slug = params?.slug as string
   const [formData, setFormData] = useState<any | null>(null)
   const [images, setImages] = useState<string[]>([])
   const [coverImage, setCoverImage] = useState<string | null>(null)
