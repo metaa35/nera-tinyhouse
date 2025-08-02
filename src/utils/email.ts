@@ -1,14 +1,17 @@
 import nodemailer from 'nodemailer'
 
-// Hostinger SMTP transporter'ı oluştur (Basit yapılandırma)
+// Hostinger SMTP transporter'ı oluştur (Alternatif yapılandırma)
 const transporter = nodemailer.createTransport({
-  host: 'smtp.hostinger.com', // Hostinger SMTP sunucusu
-  port: 465, // SSL port
-  secure: true, // SSL şifreleme
+  service: 'hostinger', // Hostinger servis adı
+  host: 'smtp.hostinger.com',
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_USER, // info@nerayapi.com
-    pass: process.env.EMAIL_PASS  // Hostinger e-posta şifresi
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  debug: true, // Debug modunu etkinleştir
+  logger: true // Logger'ı etkinleştir
 })
 
 // Transporter'ı test et
