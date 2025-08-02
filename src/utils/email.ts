@@ -9,10 +9,8 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER, // info@nerayapi.com
     pass: process.env.EMAIL_PASS  // Hostinger e-posta şifresi
   },
-  requireTLS: true,
   tls: {
-    rejectUnauthorized: false,
-    ciphers: 'SSLv3'
+    rejectUnauthorized: false
   }
 })
 
@@ -39,7 +37,7 @@ export async function sendContactEmail(contactData: {
   console.log('Alıcı:', process.env.EMAIL_USER)
 
   const mailOptions = {
-    from: `"Nera Yapı Web Sitesi" <${process.env.EMAIL_USER}>`,
+    from: process.env.EMAIL_USER, // Basit from adresi
     to: process.env.EMAIL_USER, // Kendi e-posta adresinize gönderilecek
     subject: `Yeni İletişim Formu Mesajı - ${name}`,
     html: `
@@ -90,7 +88,7 @@ export async function sendAutoReply(toEmail: string, name: string) {
   console.log('Alıcı:', toEmail)
 
   const mailOptions = {
-    from: `"Nera Yapı" <${process.env.EMAIL_USER}>`,
+    from: process.env.EMAIL_USER, // Basit from adresi
     to: toEmail,
     subject: 'Mesajınız Alındı - Nera Yapı',
     html: `
