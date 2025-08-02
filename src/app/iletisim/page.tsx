@@ -47,6 +47,10 @@ export default function ContactPage() {
       
       const result = await res.json()
       console.log('API sonucu:', result)
+      console.log('E-posta gönderildi mi:', result.emailSent)
+      console.log('Otomatik yanıt gönderildi mi:', result.autoReplySent)
+      console.log('E-posta hatası:', result.emailError)
+      console.log('Otomatik yanıt hatası:', result.autoReplyError)
       
       setSuccess('Mesajınız başarıyla gönderildi! En kısa sürede size geri dönüş yapacağız.')
       setForm({ name: '', email: '', phone: '', subject: '', message: '' })
