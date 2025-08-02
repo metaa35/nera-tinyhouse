@@ -23,7 +23,14 @@ export async function GET() {
 // POST: Yeni mesaj ekle ve e-posta gönder
 export async function POST(request: Request) {
   try {
+    console.log('İletişim formu POST isteği alındı')
+    
     const body = await request.json()
+    console.log('Form verileri:', body)
+    
+    // Environment variables kontrolü
+    console.log('EMAIL_USER:', process.env.EMAIL_USER)
+    console.log('EMAIL_PASS var mı:', !!process.env.EMAIL_PASS)
     
     // Veritabanına kaydet
     const newMessage = await prisma.contact.create({
@@ -34,26 +41,36 @@ export async function POST(request: Request) {
         message: body.message,
       }
     })
+    console.log('Veritabanına kaydedildi:', newMessage)
 
     // Size e-posta gönder
+    console.log('E-posta gönderme başlıyor...')
     const emailResult = await sendContactEmail({
       name: body.name,
       email: body.email,
       phone: body.phone,
       message: body.message
     })
+    console.log('E-posta gönderme sonucu:', emailResult)
 
     // Gönderen kişiye otomatik yanıt gönder
+    console.log('Otomatik yanıt gönderme başlıyor...')
     const autoReplyResult = await sendAutoReply(body.email, body.name)
+    console.log('Otomatik yanıt sonucu:', autoReplyResult)
 
     return NextResponse.json({
       ...newMessage,
       emailSent: emailResult.success,
-      autoReplySent: autoReplyResult.success
+      autoReplySent: autoReplyResult.success,
+      emailError: emailResult.error,
+      autoReplyError: autoReplyResult.error
     })
   } catch (error) {
     console.error('İletişim formu hatası:', error)
-    return NextResponse.json({ error: 'Mesaj eklenemedi' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Mesaj eklenemedi',
+      details: error instanceof Error ? error.message : 'Bilinmeyen hata'
+    }, { status: 500 })
   }
 }
 

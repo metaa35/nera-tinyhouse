@@ -14,6 +14,15 @@ const transporter = nodemailer.createTransport({
   }
 })
 
+// Transporter'ı test et
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error('SMTP Bağlantı hatası:', error)
+  } else {
+    console.log('SMTP Sunucu hazır')
+  }
+})
+
 // İletişim formu e-postası gönder
 export async function sendContactEmail(contactData: {
   name: string
@@ -22,6 +31,10 @@ export async function sendContactEmail(contactData: {
   message: string
 }) {
   const { name, email, phone, message } = contactData
+
+  console.log('E-posta gönderme başlıyor...')
+  console.log('Gönderen:', process.env.EMAIL_USER)
+  console.log('Alıcı:', process.env.EMAIL_USER)
 
   const mailOptions = {
     from: `"Nera Yapı Web Sitesi" <${process.env.EMAIL_USER}>`,
@@ -59,7 +72,9 @@ export async function sendContactEmail(contactData: {
   }
 
   try {
-    await transporter.sendMail(mailOptions)
+    console.log('Mail options:', mailOptions)
+    const result = await transporter.sendMail(mailOptions)
+    console.log('E-posta başarıyla gönderildi:', result)
     return { success: true }
   } catch (error) {
     console.error('E-posta gönderme hatası:', error)
@@ -69,6 +84,9 @@ export async function sendContactEmail(contactData: {
 
 // Otomatik yanıt e-postası gönder
 export async function sendAutoReply(toEmail: string, name: string) {
+  console.log('Otomatik yanıt gönderme başlıyor...')
+  console.log('Alıcı:', toEmail)
+
   const mailOptions = {
     from: `"Nera Yapı" <${process.env.EMAIL_USER}>`,
     to: toEmail,
@@ -97,7 +115,9 @@ export async function sendAutoReply(toEmail: string, name: string) {
   }
 
   try {
-    await transporter.sendMail(mailOptions)
+    console.log('Auto reply mail options:', mailOptions)
+    const result = await transporter.sendMail(mailOptions)
+    console.log('Otomatik yanıt başarıyla gönderildi:', result)
     return { success: true }
   } catch (error) {
     console.error('Otomatik yanıt gönderme hatası:', error)
