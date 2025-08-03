@@ -10,10 +10,11 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'viewer' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'VIEWER' });
   const [saving, setSaving] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editSaving, setEditSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -35,17 +36,24 @@ export default function UserManagement() {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError('');
     try {
       const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),
       });
+      
       if (res.ok) {
         setShowModal(false);
-        setNewUser({ name: '', email: '', role: 'viewer' });
+        setNewUser({ name: '', email: '', password: '', role: 'VIEWER' });
         fetchUsers();
+      } else {
+        const errorData = await res.json();
+        setError(errorData.error || 'Kullanıcı eklenirken hata oluştu');
       }
+    } catch (error) {
+      setError('Kullanıcı eklenirken hata oluştu');
     } finally {
       setSaving(false);
     }
@@ -62,21 +70,30 @@ export default function UserManagement() {
   };
 
   const handleEditUser = (user: User) => {
-    setEditUser(user);
+    setEditUser({ ...user, password: '' });
   };
 
   const handleEditUserSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editUser) return;
     setEditSaving(true);
+    setError('');
     try {
-      await fetch('/api/users', {
+      const res = await fetch('/api/users', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editUser),
       });
-      setEditUser(null);
-      fetchUsers();
+      
+      if (res.ok) {
+        setEditUser(null);
+        fetchUsers();
+      } else {
+        const errorData = await res.json();
+        setError(errorData.error || 'Kullanıcı güncellenirken hata oluştu');
+      }
+    } catch (error) {
+      setError('Kullanıcı güncellenirken hata oluştu');
     } finally {
       setEditSaving(false);
     }
@@ -113,6 +130,12 @@ export default function UserManagement() {
             </button>
           </div>
 
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {users.map((user) => (
@@ -130,12 +153,15 @@ export default function UserManagement() {
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{user.name}</div>
                           <div className="text-sm text-gray-500">{user.email}</div>
+                          <div className="text-xs text-gray-400">
+                            Oluşturulma: {user.createdAt ? new Date(user.createdAt).toLocaleDateString('tr-TR') : 'Bilinmiyor'}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-4">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                          user.role === 'editor' ? 'bg-yellow-100 text-yellow-800' :
+                          user.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
+                          user.role === 'EDITOR' ? 'bg-yellow-100 text-yellow-800' :
                           'bg-green-100 text-green-800'
                         }`}>
                           {user.role}
@@ -172,14 +198,22 @@ export default function UserManagement() {
                     required
                     className="w-full border rounded px-3 py-2"
                   />
+                  <input
+                    type="password"
+                    placeholder="Şifre"
+                    value={newUser.password}
+                    onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                    required
+                    className="w-full border rounded px-3 py-2"
+                  />
                   <select
                     value={newUser.role}
                     onChange={e => setNewUser({ ...newUser, role: e.target.value })}
                     className="w-full border rounded px-3 py-2"
                   >
-                    <option value="admin">Admin</option>
-                    <option value="editor">Editor</option>
-                    <option value="viewer">Viewer</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="EDITOR">Editor</option>
+                    <option value="VIEWER">Viewer</option>
                   </select>
                   <div className="flex justify-end space-x-2">
                     <button
@@ -224,14 +258,21 @@ export default function UserManagement() {
                     required
                     className="w-full border rounded px-3 py-2"
                   />
+                  <input
+                    type="password"
+                    placeholder="Yeni Şifre (boş bırakılırsa değişmez)"
+                    value={editUser.password}
+                    onChange={e => setEditUser({ ...editUser, password: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
                   <select
                     value={editUser.role}
                     onChange={e => setEditUser({ ...editUser, role: e.target.value })}
                     className="w-full border rounded px-3 py-2"
                   >
-                    <option value="admin">Admin</option>
-                    <option value="editor">Editor</option>
-                    <option value="viewer">Viewer</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="EDITOR">Editor</option>
+                    <option value="VIEWER">Viewer</option>
                   </select>
                   <div className="flex justify-end space-x-2">
                     <button

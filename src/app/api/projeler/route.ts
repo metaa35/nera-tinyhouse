@@ -47,7 +47,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json()
-    console.log('Gelen veri:', data)
     const { title, slug, description, content, images = [], features = [], area, location, price } = data
     
     if (!title || !slug || !description) {

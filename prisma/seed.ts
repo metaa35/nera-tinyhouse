@@ -17,7 +17,7 @@ async function main() {
     },
   })
 
-  console.log({ admin })
+  // Admin kullanıcısı oluşturuldu
 }
 
 main()

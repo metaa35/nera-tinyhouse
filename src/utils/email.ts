@@ -12,10 +12,6 @@ export async function sendContactEmail(contactData: {
 }) {
   const { name, email, phone, message } = contactData
 
-  console.log('E-posta gönderme başlıyor...')
-  console.log('Gönderen: info@nerayapi.com')
-  console.log('Alıcı: info@nerayapi.com')
-
   try {
     const result = await resend.emails.send({
       from: 'info@nerayapi.com',
@@ -52,19 +48,14 @@ export async function sendContactEmail(contactData: {
       `
     })
 
-    console.log('E-posta başarıyla gönderildi:', result)
     return { success: true }
   } catch (error) {
-    console.error('E-posta gönderme hatası:', error)
     return { success: false, error: error instanceof Error ? error.message : 'Bilinmeyen hata' }
   }
 }
 
 // Otomatik yanıt e-postası gönder
 export async function sendAutoReply(toEmail: string, name: string) {
-  console.log('Otomatik yanıt gönderme başlıyor...')
-  console.log('Alıcı:', toEmail)
-
   try {
     const result = await resend.emails.send({
       from: 'info@nerayapi.com',
@@ -93,10 +84,8 @@ export async function sendAutoReply(toEmail: string, name: string) {
       `
     })
 
-    console.log('Otomatik yanıt başarıyla gönderildi:', result)
     return { success: true }
   } catch (error) {
-    console.error('Otomatik yanıt gönderme hatası:', error)
     return { success: false, error: error instanceof Error ? error.message : 'Bilinmeyen hata' }
   }
 } 

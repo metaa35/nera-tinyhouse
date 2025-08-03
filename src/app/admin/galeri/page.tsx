@@ -44,7 +44,7 @@ export default function AdminGaleriPage() {
     script.src = 'https://upload-widget.cloudinary.com/global/all.js'
     script.async = true
     script.onload = () => {
-      console.log('Cloudinary widget loaded')
+      // Cloudinary widget yüklendi
     }
     document.head.appendChild(script)
   }, [])
@@ -104,7 +104,6 @@ export default function AdminGaleriPage() {
       },
       (error: any, result: any) => {
         if (!error && result && result.event === 'success') {
-          console.log('Video uploaded successfully:', result.info.secure_url)
           setFormData({ ...formData, url: result.info.secure_url })
           alert('Video başarıyla yüklendi! Şimdi başlık ve diğer bilgileri girebilirsiniz.')
         } else if (error) {
@@ -128,7 +127,6 @@ export default function AdminGaleriPage() {
       if (selectedFile) {
         if (formData.type === 'VIDEO') {
           // Video dosyaları için direkt Cloudinary upload (Vercel API'si kullanmadan)
-          console.log('Video uploading directly to Cloudinary...')
           
           // Önce signature al
           const timestamp = Math.round(new Date().getTime() / 1000)
@@ -169,8 +167,6 @@ export default function AdminGaleriPage() {
             { width: 1280, height: 720, crop: 'fill', quality: 'auto' }
           ]))
           
-          console.log('Starting direct Cloudinary upload...')
-          
           const directResponse = await fetch('https://api.cloudinary.com/v1_1/df770zzfr/video/upload', {
             method: 'POST',
             body: uploadFormData,
@@ -184,7 +180,6 @@ export default function AdminGaleriPage() {
           
           const directResult = await directResponse.json()
           mediaUrl = directResult.secure_url
-          console.log('Video uploaded successfully:', mediaUrl)
           
         } else {
           // Resim dosyaları için normal upload
