@@ -25,7 +25,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Kullanıcı bulunamadı")
         }
         // Şifreyi karşılaştır
+        console.log('Giriş şifresi:', credentials.password)
+        console.log('DB şifresi:', user.password)
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+        console.log('Şifre doğru mu:', isPasswordValid)
         if (!isPasswordValid) {
           throw new Error("Geçersiz şifre")
         }

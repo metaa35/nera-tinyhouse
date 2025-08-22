@@ -7,13 +7,15 @@ interface YouTubeVideoPlayerProps {
   title?: string
   className?: string
   thumbnail?: string
+  onFullscreen?: () => void
 }
 
 export default function YouTubeVideoPlayer({
   videoId,
   title,
   className = '',
-  thumbnail
+  thumbnail,
+  onFullscreen
 }: YouTubeVideoPlayerProps) {
   const [isHovered, setIsHovered] = useState(false)
 
@@ -32,9 +34,13 @@ export default function YouTubeVideoPlayer({
     return `https://img.youtube.com/vi/${actualVideoId}/maxresdefault.jpg`
   }
 
-  // YouTube'da aç
-  const openInYouTube = () => {
-    window.open(`https://www.youtube.com/watch?v=${actualVideoId}`, '_blank')
+  // YouTube'da aç veya tam ekran
+  const handleClick = () => {
+    if (onFullscreen) {
+      onFullscreen()
+    } else {
+      window.open(`https://www.youtube.com/watch?v=${actualVideoId}`, '_blank')
+    }
   }
 
   return (
@@ -42,7 +48,7 @@ export default function YouTubeVideoPlayer({
       className={`relative overflow-hidden rounded-lg bg-black cursor-pointer group ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={openInYouTube}
+      onClick={handleClick}
     >
       {/* Thumbnail */}
       <img

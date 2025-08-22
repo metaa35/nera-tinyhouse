@@ -20,7 +20,7 @@ export default function LayoutClientWrapper({ children }: { children: React.Reac
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-32">
             <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
-              <img src="/logo.svg" alt="Nera Yapı" width={128} height={128} className="w-32 h-32" />
+                              <img src="/logo.svg" alt="Tenteks & Nera Yapı" width={200} height={60} className="w-48 h-14" />
             </Link>
             <div className="hidden md:flex items-center space-x-8">
               <Link href="/" className="text-[#2D3436] hover:text-[#FF6B6B] transition-colors duration-300">Ana Sayfa</Link>
@@ -66,7 +66,7 @@ export default function LayoutClientWrapper({ children }: { children: React.Reac
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
               <div className="flex items-center space-x-2 mb-6">
-                <img src="/logo.svg" alt="Nera Yapı" width={128} height={128} className="w-32 h-32" />
+                <img src="/logo.svg" alt="Tenteks & Nera Yapı" width={200} height={60} className="w-48 h-14" />
               </div>
             </div>
             <div>

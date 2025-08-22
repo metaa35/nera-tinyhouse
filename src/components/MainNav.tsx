@@ -11,7 +11,7 @@ export default function MainNav() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex items-center">
-              <img src="/logo.png" alt="Nera Yapı" className="h-8 w-auto" />
+              <img src="/logo.svg" alt="Tenteks & Nera Yapı" className="h-8 w-auto" />
             </Link>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

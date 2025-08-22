@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { shuffleArray } from '@/utils/array';
 import RandomGalleryImages from '@/components/RandomGalleryImages';
+import { resetUsedImages } from '@/utils/media';
 
 interface Project {
   id: number;
@@ -22,6 +23,9 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
+    // Sayfa yüklendiğinde kullanılan görselleri sıfırla
+    resetUsedImages()
+    
     fetch("/api/projeler")
       .then((res) => res.json())
       .then((projects) => {
@@ -151,7 +155,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center w-full gap-12">
             {/* Sol: Görsel */}
             <div className="flex-1 flex justify-center">
-              <RandomGalleryImages count={1} className="max-w-md" />
+              <RandomGalleryImages count={3} className="max-w-4xl grid-cols-3 gap-3" />
             </div>
             {/* Sağ: Hizmetler */}
             <div className="flex-1 flex flex-col gap-8">

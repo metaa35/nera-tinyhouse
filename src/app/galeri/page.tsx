@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import SimpleVideoPlayer from '@/components/SimpleVideoPlayer'
 import YouTubeVideoPlayer from '@/components/YouTubeVideoPlayer'
-
+import ImageModal from '@/components/ImageModal'
+import VideoModal from '@/components/VideoModal'
 
 interface Media {
   id: number
@@ -21,6 +22,11 @@ export default function GaleriPage() {
   const [media, setMedia] = useState<Media[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'images' | 'videos'>('images')
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; alt: string } | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [selectedVideo, setSelectedVideo] = useState<{ url: string; title: string; source?: string } | null>(null)
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
 
   useEffect(() => {
     fetchMedia()
@@ -42,6 +48,55 @@ export default function GaleriPage() {
 
   const images = media.filter(item => item.type === 'IMAGE')
   const videos = media.filter(item => item.type === 'VIDEO')
+
+  const handleImageClick = (image: Media, index: number) => {
+    setSelectedImage({
+      url: image.url,
+      title: image.title,
+      alt: image.alt || image.title
+    })
+    setCurrentImageIndex(index)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedImage(null)
+  }
+
+  const handleNavigate = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      const newIndex = currentImageIndex === 0 ? images.length - 1 : currentImageIndex - 1
+      setCurrentImageIndex(newIndex)
+      setSelectedImage({
+        url: images[newIndex].url,
+        title: images[newIndex].title,
+        alt: images[newIndex].alt || images[newIndex].title
+      })
+    } else {
+      const newIndex = currentImageIndex === images.length - 1 ? 0 : currentImageIndex + 1
+      setCurrentImageIndex(newIndex)
+      setSelectedImage({
+        url: images[newIndex].url,
+        title: images[newIndex].title,
+        alt: images[newIndex].alt || images[newIndex].title
+      })
+    }
+  }
+
+  const handleVideoClick = (video: Media) => {
+    setSelectedVideo({
+      url: video.url,
+      title: video.title,
+      source: video.source
+    })
+    setIsVideoModalOpen(true)
+  }
+
+  const closeVideoModal = () => {
+    setIsVideoModalOpen(false)
+    setSelectedVideo(null)
+  }
 
   if (loading) {
     return (
@@ -127,21 +182,32 @@ export default function GaleriPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {images.map((image) => (
+                  {images.map((image, index) => (
                     <div
                       key={image.id}
-                      className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                      className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                      onClick={() => handleImageClick(image, index)}
                     >
                       <Image
                         src={image.url}
                         alt={image.alt || image.title}
-                        width={400}
-                        height={300}
+                        width={800}
+                        height={600}
                         className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                        quality={85}
+                        unoptimized={image.url.startsWith('http') || image.url.startsWith('data:')}
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-end">
                         <div className="p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <h3 className="font-semibold text-sm">{image.title}</h3>
+                        </div>
+                      </div>
+                      {/* Zoom Icon */}
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-black bg-opacity-70 rounded-lg p-2">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                          </svg>
                         </div>
                       </div>
                     </div>
@@ -170,13 +236,14 @@ export default function GaleriPage() {
                       className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
                     >
                       {/* Video Player */}
-                      <div className="relative aspect-video">
+                      <div className="relative aspect-video cursor-pointer" onClick={() => handleVideoClick(video)}>
                         {video.source === 'youtube' ? (
                           <YouTubeVideoPlayer
                             videoId={video.url}
                             title={video.title}
                             className="w-full h-full"
                             thumbnail={video.thumbnail}
+                            onFullscreen={() => handleVideoClick(video)}
                           />
                         ) : (
                           <SimpleVideoPlayer
@@ -185,6 +252,14 @@ export default function GaleriPage() {
                             className="w-full h-full"
                           />
                         )}
+                        {/* Fullscreen Icon */}
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="bg-black bg-opacity-70 rounded-lg p-2">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                            </svg>
+                          </div>
+                        </div>
                       </div>
                       
                       {/* Video Info */}
@@ -212,6 +287,35 @@ export default function GaleriPage() {
           )}
         </div>
       </section>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <ImageModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          imageUrl={selectedImage.url}
+          title={selectedImage.title}
+          alt={selectedImage.alt}
+          images={images.map(img => ({
+            url: img.url,
+            title: img.title,
+            alt: img.alt || img.title
+          }))}
+          currentIndex={currentImageIndex}
+          onNavigate={handleNavigate}
+        />
+      )}
+
+      {/* Video Modal */}
+      {selectedVideo && (
+        <VideoModal
+          isOpen={isVideoModalOpen}
+          onClose={closeVideoModal}
+          videoUrl={selectedVideo.url}
+          title={selectedVideo.title}
+          source={selectedVideo.source}
+        />
+      )}
     </div>
   )
 } 

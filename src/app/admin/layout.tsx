@@ -63,6 +63,7 @@ export default function AdminLayout({
               <Link href="/admin" className={isActive('/admin') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>Ana Sayfa</Link>
               <Link href="/admin/projeler" className={isActive('/admin/projeler') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>Projeler</Link>
               <Link href="/admin/galeri" className={isActive('/admin/galeri') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>Galeri</Link>
+              <Link href="/admin/e-katalog" className={isActive('/admin/e-katalog') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>E-Katalog</Link>
               <Link href="/admin/ekibimiz" className={isActive('/admin/ekibimiz') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>Ekibimiz</Link>
               <Link href="/admin/faq" className={isActive('/admin/faq') ? 'text-blue-600 font-semibold' : 'text-gray-600 hover:text-blue-600'}>SSS</Link>
             </div>

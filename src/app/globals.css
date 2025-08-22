@@ -272,3 +272,17 @@ input, textarea, select {
 label, h1, h2, h3, h4, h5, h6 {
   color: #111 !important;
 }
+
+/* Footer başlıkları için özel stil */
+footer h3,
+footer .text-lg.font-semibold.mb-4,
+footer h3.text-lg.font-semibold.mb-4 {
+  color: white !important;
+  color: #ffffff !important;
+}
+
+/* Daha spesifik footer başlık stili */
+.bg-gray-900 h3.text-lg.font-semibold.mb-4 {
+  color: #ffffff !important;
+  color: white !important;
+}

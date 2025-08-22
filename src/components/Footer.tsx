@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo ve Açıklama */}
           <div className="space-y-4">
-            <Image src="/logo.svg" alt="Nera Yapı" width={120} height={60} className="invert" />
+            <Image src="/logo.svg" alt="Tenteks & Nera Yapı" width={200} height={60} className="invert" />
             <p className="text-gray-400 text-sm">
               Sürdürülebilir ve modern tiny house çözümleri ile hayalinizdeki yaşam alanını birlikte tasarlayalım.
             </p>

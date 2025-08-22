@@ -6,10 +6,10 @@ import type { Metadata } from "next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "NERA YAPI",
-  description: "NERA YAPI",
+  title: "Tenteks & Nera Yapı",
+  description: "Tenteks Tente & Pergola Sistemleri ve Nera Yapı Tiny House Çözümleri",
   icons: {
-    icon: "/logo.svg"
+    icon: "/logo1.svg"
   }
 };
 

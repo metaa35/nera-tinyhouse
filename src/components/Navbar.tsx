@@ -13,7 +13,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <Image src="/logo.svg" alt="Nera Yapı" width={120} height={60} priority />
+            <Image src="/logo.svg" alt="Tenteks & Nera Yapı" width={200} height={60} priority />
           </Link>
 
           {/* Desktop Menu */}
@@ -26,6 +26,9 @@ export default function Navbar() {
             </Link>
             <Link href="/galeri" className="text-gray-700 hover:text-blue-600 transition-colors">
               Galeri
+            </Link>
+            <Link href="/e-katalog" className="text-gray-700 hover:text-blue-600 transition-colors">
+              E-Katalog
             </Link>
             <Link href="/hakkimizda" className="text-gray-700 hover:text-blue-600 transition-colors">
               Hakkımızda
@@ -88,6 +91,13 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Galeri
+            </Link>
+            <Link
+              href="/e-katalog"
+              className="block text-gray-700 hover:text-blue-600 transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              E-Katalog
             </Link>
             <Link
               href="/hakkimizda"

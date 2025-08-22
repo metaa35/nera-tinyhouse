@@ -47,6 +47,8 @@ export async function POST(req: NextRequest) {
 
     // Şifreyi hashle
     const hashedPassword = await bcrypt.hash(password, 10)
+    console.log('Orijinal şifre:', password)
+    console.log('Hashlenmiş şifre:', hashedPassword)
 
     const newUser = await prisma.user.create({
       data: {
@@ -67,6 +69,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newUser, { status: 201 })
   } catch (error) {
+    console.error('Kullanıcı oluşturma hatası:', error)
     return NextResponse.json({ error: 'Kullanıcı oluşturulamadı' }, { status: 500 })
   }
 }

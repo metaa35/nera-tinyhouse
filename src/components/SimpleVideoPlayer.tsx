@@ -6,9 +6,10 @@ interface SimpleVideoPlayerProps {
   url: string
   title?: string
   className?: string
+  onFullscreen?: () => void
 }
 
-export default function SimpleVideoPlayer({ url, title, className = '' }: SimpleVideoPlayerProps) {
+export default function SimpleVideoPlayer({ url, title, className = '', onFullscreen }: SimpleVideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
 
   // YouTube URL'sini embed formatına çevir
@@ -95,6 +96,17 @@ export default function SimpleVideoPlayer({ url, title, className = '' }: Simple
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         />
+        {/* Fullscreen Button */}
+        {onFullscreen && (
+          <button
+            onClick={onFullscreen}
+            className="absolute top-3 right-3 bg-black bg-opacity-70 text-white rounded-lg p-2 hover:bg-opacity-90 transition-all duration-200"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          </button>
+        )}
       </div>
     )
   }
@@ -109,6 +121,17 @@ export default function SimpleVideoPlayer({ url, title, className = '' }: Simple
         <source src={url} type="video/mp4" />
         Tarayıcınız video oynatmayı desteklemiyor.
       </video>
+      {/* Fullscreen Button */}
+      {onFullscreen && (
+        <button
+          onClick={onFullscreen}
+          className="absolute top-3 right-3 bg-black bg-opacity-70 text-white rounded-lg p-2 hover:bg-opacity-90 transition-all duration-200"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+        </button>
+      )}
     </div>
   )
 } 

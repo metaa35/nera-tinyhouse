@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { fetchGalleryMedia, getRandomImages } from '@/utils/media'
+import { fetchGalleryMedia, getUniqueRandomImages } from '@/utils/media'
 
 interface RandomGalleryImagesProps {
   count?: number
@@ -26,7 +26,7 @@ export default function RandomGalleryImages({
     setLoading(true)
     try {
       await fetchGalleryMedia()
-      const randomImages = getRandomImages(count)
+      const randomImages = getUniqueRandomImages(count)
       setImages(randomImages)
     } catch (error) {
       console.error('Rastgele görseller yüklenirken hata:', error)
